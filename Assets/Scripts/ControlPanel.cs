@@ -142,6 +142,8 @@ namespace Assets.Scripts
                 var existing =
                     model.mediaScreenDisplayStates.FirstOrDefault(s => s.screenDisplayId == buffer.ScreenDisplayId);
 
+                Debug.Log($"Realtime model exists: {existing != null}");
+
                 if (existing != null)
                 {
                     existing.mediaTypeId = buffer.MediaTypeId;
@@ -155,6 +157,8 @@ namespace Assets.Scripts
                         mediaId = buffer.MediaId,
                         screenDisplayId = buffer.ScreenDisplayId
                     };
+
+                    Debug.Log($"Realtime mediaState: {mediaState}");
 
                     model.mediaScreenDisplayStates.Add(mediaState);
                 }
