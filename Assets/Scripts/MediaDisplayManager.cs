@@ -99,14 +99,14 @@ namespace Assets.Scripts
 
             CanTransformScene = new List<Scene> {Scene.Scene1};
 
-            SpawnScene(Scene.Scene1, ScreenFormation.LargeSquare);
-            SpawnScene(Scene.Scene2, ScreenFormation.ShortRectangle);
-            SpawnScene(Scene.Scene3, ScreenFormation.Circle);
-            SpawnScene(Scene.Scene4, ScreenFormation.Cross);
-            SpawnScene(Scene.Scene5, ScreenFormation.SmallSquare);
-            SpawnScene(Scene.Scene6, ScreenFormation.LongRectangle);
-            SpawnScene(Scene.Scene7, ScreenFormation.LargeStar);
-            SpawnScene(Scene.Scene8, ScreenFormation.Triangle);
+            //SpawnScene(Scene.Scene1, ScreenFormation.LargeSquare);
+            //SpawnScene(Scene.Scene2, ScreenFormation.ShortRectangle);
+            //SpawnScene(Scene.Scene3, ScreenFormation.Circle);
+            //SpawnScene(Scene.Scene4, ScreenFormation.Cross);
+            //SpawnScene(Scene.Scene5, ScreenFormation.SmallSquare);
+            //SpawnScene(Scene.Scene6, ScreenFormation.LongRectangle);
+            //SpawnScene(Scene.Scene7, ScreenFormation.LargeStar);
+            //SpawnScene(Scene.Scene8, ScreenFormation.Triangle);
 
             CreateStreamSelectButtons();
 
