@@ -139,33 +139,60 @@ namespace Assets.Scripts
         {
             foreach (var buffer in _preparedStateBuffer)
             {
-                var existing =
-                    model.mediaScreenDisplayStates.FirstOrDefault(s => s.screenDisplayId == buffer.ScreenDisplayId);
+                var gameManager = GameObject.Find("GameManager");
 
-                Debug.Log($"Realtime model exists: {existing != null}");
-
-                if (existing != null)
+                if (buffer.MediaTypeId == (int) MediaType.VideoClip)
                 {
-                    existing.mediaTypeId = buffer.MediaTypeId;
-                    existing.mediaId = buffer.MediaId;
+                    var videoSelect = gameManager.GetComponent<VideoSelect>();
+                    videoSelect.SetVideoId(buffer.MediaId);
+                    videoSelect.KeepInSync();
                 }
                 else
                 {
-                    var mediaState = new MediaScreenDisplayStateModel
-                    {
-                        mediaTypeId = buffer.MediaTypeId,
-                        mediaId = buffer.MediaId,
-                        screenDisplayId = buffer.ScreenDisplayId
-                    };
-
-                    Debug.Log($"Realtime mediaState: {mediaState}");
-
-                    model.mediaScreenDisplayStates.Add(mediaState);
+                    var streamSelect = gameManager.GetComponent<StreamSelect>();
+                    streamSelect.SetStreamId(buffer.MediaId);
+                    streamSelect.KeepInSync();
                 }
+
+                var displaySelect = gameManager.GetComponent<DisplaySelect>();
+                displaySelect.SetDisplayId(buffer.ScreenDisplayId);
+                displaySelect.KeepInSync();
             }
 
             _preparedStateBuffer.Clear();
         }
+
+        //public void Apply()
+        //{
+        //    foreach (var buffer in _preparedStateBuffer)
+        //    {
+        //        var existing =
+        //            model.mediaScreenDisplayStates.FirstOrDefault(s => s.screenDisplayId == buffer.ScreenDisplayId);
+
+        //        Debug.Log($"Realtime model exists: {existing != null}");
+
+        //        if (existing != null)
+        //        {
+        //            existing.mediaTypeId = buffer.MediaTypeId;
+        //            existing.mediaId = buffer.MediaId;
+        //        }
+        //        else
+        //        {
+        //            var mediaState = new MediaScreenDisplayStateModel
+        //            {
+        //                mediaTypeId = buffer.MediaTypeId,
+        //                mediaId = buffer.MediaId,
+        //                screenDisplayId = buffer.ScreenDisplayId
+        //            };
+
+        //            Debug.Log($"Realtime mediaState: {mediaState}");
+
+        //            model.mediaScreenDisplayStates.Add(mediaState);
+        //        }
+        //    }
+
+        //    _preparedStateBuffer.Clear();
+        //}
 
         public void Clear()
         {
