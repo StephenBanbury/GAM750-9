@@ -3,39 +3,66 @@ using UnityEngine;
 
 namespace Assets.Scripts
 {
-    public class DisplaySelectSync : RealtimeComponent
+    public class DisplaySelectSync : RealtimeComponent<DisplaySelectSyncModel>
     {
-        private DisplaySelectSyncModel _model;
+        //private DisplaySelectSyncModel _model;
         private DisplaySelect _displaySelect;
+        private int _displayId;
 
         void Start()
         {
             _displaySelect = GetComponent<DisplaySelect>();
         }
 
-        private DisplaySelectSyncModel model
+        protected override void OnRealtimeModelReplaced(DisplaySelectSyncModel previousModel,
+            DisplaySelectSyncModel currentModel)
         {
-            set
+            Debug.Log($"PreviousModel: {previousModel != null}");
+            Debug.Log($"CurrentModel: {currentModel != null}");
+
+            if (previousModel != null)
             {
-                if (_model != null)
-                {
-                    // Unregister from events
-                    _model.displayIdDidChange -= DisplayIdDidChange;
-                }
+                // Unregister from events
+                previousModel.displayIdDidChange -= DisplayIdDidChange;
+            }
 
-                // Store the model
-                _model = value;
+            if (currentModel != null)
+            {
+                // If this is a model that has no data set on it, populate it with the current value.
+                if (currentModel.isFreshModel)
+                    currentModel.displayId = _displayId;
 
-                if (_model != null)
-                {
-                    // Update the display id to match the new model
-                    UpdateDisplayId();
+                // Update the formationId to match the new model
+                UpdateDisplayId();
 
-                    // Register for events so we'll know if the value changes later
-                    _model.displayIdDidChange += DisplayIdDidChange;
-                }
+                // Register for events so we'll know if the value changes later
+                currentModel.displayIdDidChange += DisplayIdDidChange;
             }
         }
+
+        //private DisplaySelectSyncModel model
+        //{
+        //    set
+        //    {
+        //        if (_model != null)
+        //        {
+        //            // Unregister from events
+        //            _model.displayIdDidChange -= DisplayIdDidChange;
+        //        }
+
+        //        // Store the model
+        //        _model = value;
+
+        //        if (_model != null)
+        //        {
+        //            // Update the display id to match the new model
+        //            UpdateDisplayId();
+
+        //            // Register for events so we'll know if the value changes later
+        //            _model.displayIdDidChange += DisplayIdDidChange;
+        //        }
+        //    }
+        //}
 
         private void DisplayIdDidChange(DisplaySelectSyncModel model, int value)
         {
@@ -46,26 +73,43 @@ namespace Assets.Scripts
         {
             Debug.Log("UpdateDisplayId");
 
-            if (_model != null && _model.displayId > 0)
+            if (model != null && model.displayId > 0)
             {
                 // Get the value from the model, display it and update the video display manager
-                _displaySelect.SetDisplayId(_model.displayId);
+                _displaySelect.SetDisplayId(model.displayId);
                 
                 //Debug.Log("Sync: Selected display updated");
                 
-                MediaDisplayManager.instance.SelectedDisplay = _model.displayId;
+                //MediaDisplayManager.instance.SelectedDisplay = model.displayId;
                 //MediaDisplayManager.instance.StoreScreenDisplayState();
                 MediaDisplayManager.instance.AssignMediaToDisplay();
             }
         }
-        
+
+        //private void UpdateDisplayId()
+        //{
+        //    Debug.Log("UpdateDisplayId");
+
+        //    if (_model != null && _model.displayId > 0)
+        //    {
+        //        // Get the value from the model, display it and update the video display manager
+        //        _displaySelect.SetDisplayId(_model.displayId);
+
+        //        //Debug.Log("Sync: Selected display updated");
+
+        //        MediaDisplayManager.instance.SelectedDisplay = _model.displayId;
+        //        //MediaDisplayManager.instance.StoreScreenDisplayState();
+        //        MediaDisplayManager.instance.AssignMediaToDisplay();
+        //    }
+        //}
+
         public void SetId(int id)
         {
             Debug.Log("DisplaySelectSync: SetId");
 
             // Set the value on the model
             // This will fire the valueChanged event on the model, which will update the value for both the local player and all remote players
-            _model.displayId = id;
+            model.displayId = id;
         }
     }
 }

@@ -35,8 +35,8 @@ namespace Assets.Scripts
             {
                 Debug.Log($"videoId: {_videoId}");
 
-                _videoSelectSync.SetId(_videoId);
                 _previousId = _videoId;
+                _videoSelectSync.SetId(_videoId);
             }
         }
     }

@@ -17,7 +17,7 @@ using Random = UnityEngine.Random;
 
 namespace Assets.Scripts
 {
-    public class MediaDisplayManager: RealtimeComponent<MediaScreenDisplayModel>
+    public class MediaDisplayManager : RealtimeComponent<MediaScreenDisplayModel>
     {
         public static MediaDisplayManager instance;
 
@@ -97,7 +97,7 @@ namespace Assets.Scripts
 
             _sceneIndex = 1;
 
-            CanTransformScene = new List<Scene> {Scene.Scene1};
+            CanTransformScene = new List<Scene> { Scene.Scene1 };
 
             SpawnScene(Scene.Scene1, ScreenFormation.LargeSquare);
             SpawnScene(Scene.Scene2, ScreenFormation.ShortRectangle);
@@ -144,10 +144,10 @@ namespace Assets.Scripts
                 int numberOfActions = Enum.GetValues(typeof(ScreenAction)).Cast<int>().Max();
                 do
                 {
-                    newAction = (ScreenAction) Math.Ceiling(Random.value * numberOfActions);
+                    newAction = (ScreenAction)Math.Ceiling(Random.value * numberOfActions);
                 } while (newAction == lastAction
                          || newAction == ScreenAction.ChangeFormation && !canDoFormation
-                         || newAction == ScreenAction.DoTeleport && lastAction != ScreenAction.CreatePortal 
+                         || newAction == ScreenAction.DoTeleport && lastAction != ScreenAction.CreatePortal
                          || newAction == ScreenAction.ChangeVideoStream && !hasVideoStreams);
             }
 
@@ -174,7 +174,7 @@ namespace Assets.Scripts
             int randomSceneId;
             do
             {
-                randomSceneId = (int) Math.Ceiling(Random.value * numberOfScenes);
+                randomSceneId = (int)Math.Ceiling(Random.value * numberOfScenes);
             } while (randomSceneId == currentSceneId);
 
             StartCoroutine(DoTeleportation(randomSceneId));
@@ -295,7 +295,8 @@ namespace Assets.Scripts
                     GameObject scene = GameObject.Find(sceneDetail.Name);
                     Transform panels = scene.transform.Find($"Selection Panel {sceneDetail.Id}");
 
-                    if(panels != null) { 
+                    if (panels != null)
+                    {
                         Transform selectorPanel = panels.Find("StreamSelectorPanel");
 
                         if (selectorPanel != null)
@@ -331,7 +332,7 @@ namespace Assets.Scripts
                                 buttonScript.StreamId = joinedUser.Id;
 
                                 button.transform.SetParent(selectorPanel);
-                                
+
                                 i++;
                             }
                         }
@@ -386,7 +387,9 @@ namespace Assets.Scripts
 
         private void MediaAssignedToDisplay(RealtimeArray<MediaScreenDisplayStateModel> mediaScreenDisplayStates, MediaScreenDisplayStateModel mediaScreenDisplayState, bool remote)
         {
-            AssignMediaToDisplay();
+            Debug.Log("MediaAssignedToDisplay");
+            //AssignMediaToDisplay();
+            AssignMediaToDisplaysFromArray();
         }
 
         protected override void OnRealtimeModelReplaced(MediaScreenDisplayModel previousModel, MediaScreenDisplayModel currentModel)
@@ -416,7 +419,7 @@ namespace Assets.Scripts
                 currentModel.mediaScreenDisplayStates.modelAdded += MediaAssignedToDisplay;
             }
         }
-        
+
         public void AssignMediaToDisplay()
         {
             switch (_lastSelectedMediaType)
@@ -441,12 +444,12 @@ namespace Assets.Scripts
 
                 switch (mediaInfo.mediaTypeId)
                 {
-                    case (int) MediaType.VideoClip:
+                    case (int)MediaType.VideoClip:
                         Debug.Log($"Assign video clip {mediaInfo.mediaId} to display {mediaInfo.screenDisplayId}");
                         AssignVideoToDisplay(mediaInfo.mediaId, mediaInfo.screenDisplayId);
                         break;
 
-                    case (int) MediaType.VideoStream:
+                    case (int)MediaType.VideoStream:
                         Debug.Log($"Assign video stream {mediaInfo.mediaId} to display {mediaInfo.screenDisplayId}");
                         AssignStreamToDisplay(mediaInfo.mediaId, mediaInfo.screenDisplayId);
                         break;
@@ -467,7 +470,7 @@ namespace Assets.Scripts
             if (existing != null)
             {
                 existing.mediaTypeId =
-                    (int) _lastSelectedMediaType;
+                    (int)_lastSelectedMediaType;
                 existing.mediaId =
                     _lastSelectedMediaType == MediaType.VideoClip
                         ? _lastSelectedVideoId
@@ -481,7 +484,7 @@ namespace Assets.Scripts
                 MediaScreenDisplayStateModel mediaScreenDisplayState = new MediaScreenDisplayStateModel
                 {
                     screenDisplayId = _lastSelectedDisplayId,
-                    mediaTypeId = (int) _lastSelectedMediaType,
+                    mediaTypeId = (int)_lastSelectedMediaType,
                     mediaId = _lastSelectedMediaType == MediaType.VideoClip
                         ? _lastSelectedVideoId
                         : _lastSelectedStreamId,
@@ -491,7 +494,7 @@ namespace Assets.Scripts
                 model.mediaScreenDisplayStates.Add(mediaScreenDisplayState);
             }
         }
-        
+
         public void StoreRealtimeScreenPortalState(int screenId, bool isActive)
         {
 
@@ -577,7 +580,7 @@ namespace Assets.Scripts
                 {
                     // Video clip from Url
                     Debug.Log("URL video clip");
-                    
+
                     videoPlayer.source = VideoSource.Url;
                     videoPlayer.url = thisVideoClip.LocalPath;
                 }
@@ -725,10 +728,10 @@ namespace Assets.Scripts
         {
             var thisFormation = new List<ScreenPosition>();
             var screenFormationService = new ScreenFormationService(scene);
-            
+
             switch (formation)
             {
-                case ScreenFormation.LargeSquare: 
+                case ScreenFormation.LargeSquare:
                     thisFormation = screenFormationService.LargeSquare();
                     break;
                 case ScreenFormation.SmallSquare:
@@ -769,10 +772,10 @@ namespace Assets.Scripts
                 //Debug.Log($"{sceneName} not found");
                 sceneObject = new GameObject(sceneName);
             }
-            
+
 
             // Instantiate selection panels, audio source and lighting as part of scene object
-            
+
             var selectionPanelsTrans = sceneObject.transform.Find($"Selection Panel {_sceneIndex}");
             if (selectionPanelsTrans == null)
             {
@@ -810,7 +813,7 @@ namespace Assets.Scripts
                 sceneLights.transform.SetParent(sceneObject.transform);
                 sceneLights.name = $"Scene Lights {_sceneIndex}";
             }
-            
+
             Scenes.Add(new SceneDetail
             {
                 Id = _sceneIndex,
@@ -829,7 +832,7 @@ namespace Assets.Scripts
                 screensContainer = new GameObject($"Screens {_sceneIndex}");
                 screensContainer.transform.SetParent(sceneObject.transform);
             }
-            
+
             var currentScene = Scenes.First(s => s.Id == _sceneIndex);
 
             foreach (var screenPosition in thisFormation)
@@ -947,7 +950,7 @@ namespace Assets.Scripts
 
                     var vector3To = screenPosition.Vector3;
                     vector3To.y += _floorAdjust;
-                    
+
                     screenPositionPrev.transform.DOMove(vector3To, tweenTimeSeconds).SetEase(Ease.Linear);
                     screenPositionPrev.transform.DORotate(new Vector3(0, screenPosition.Rotation, 0), 3)
                         .SetEase(Ease.Linear);

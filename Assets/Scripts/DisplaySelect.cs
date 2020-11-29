@@ -22,7 +22,7 @@ namespace Assets.Scripts
 
             _displayId = id;
             
-            if (_displayId > 0) // && _displayId != _previousId)
+            if (_displayId > 0 && _displayId != _previousId)
             {
                 MediaDisplayManager.instance.SelectedDisplay = _displayId;
                 MediaDisplayManager.instance.StoreRealtimeScreenMediaState();
@@ -37,10 +37,10 @@ namespace Assets.Scripts
 
             // TODO: check display plus media type and id have not changed
 
-                Debug.Log($"Keep in sync: displayId: {_displayId}");
+            Debug.Log($"Keep in sync: displayId: {_displayId}");
 
-                _displaySelectSync.SetId(_displayId);
-                _previousId = _displayId;
+            _previousId = _displayId;
+            _displaySelectSync.SetId(_displayId);
             //}
         }
     }

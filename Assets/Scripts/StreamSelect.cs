@@ -34,9 +34,9 @@ namespace Assets.Scripts
             if (_streamId != _previousId)
             {
                 Debug.Log($"streamId: {_streamId}");
+                _previousId = _streamId;
 
                 _streamSelectSync.SetId(_streamId);
-                _previousId = _streamId;
             }
         }
     }

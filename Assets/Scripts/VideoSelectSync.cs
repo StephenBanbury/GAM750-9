@@ -3,42 +3,69 @@ using UnityEngine;
 
 namespace Assets.Scripts
 {
-    public class VideoSelectSync : RealtimeComponent
+    public class VideoSelectSync : RealtimeComponent<VideoSelectSyncModel>
     {
-        private VideoSelectSyncModel _model;
+        //private VideoSelectSyncModel _model;
         private VideoSelect _videoSelectDisplay;
+        private int _videoId;
 
         void Start()
         {
             _videoSelectDisplay = GetComponent<VideoSelect>();
         }
 
-        private VideoSelectSyncModel model
+        protected override void OnRealtimeModelReplaced(VideoSelectSyncModel previousModel,
+            VideoSelectSyncModel currentModel)
         {
-            set
+            Debug.Log($"PreviousModel: {previousModel != null}");
+            Debug.Log($"CurrentModel: {currentModel != null}");
+
+            if (previousModel != null)
             {
-                //Debug.Log("In VideoSelectSyncModel");
+                // Unregister from events
+                previousModel.videoIdDidChange -= VideoIdDidChange;
+            }
 
-                if (_model != null)
-                {
-                    // Unregister from events
-                    _model.videoIdDidChange -= VideoIdDidChange;
-                }
+            if (currentModel != null)
+            {
+                // If this is a model that has no data set on it, populate it with the current value.
+                if (currentModel.isFreshModel)
+                    currentModel.videoId = _videoId;
 
-                // Store the model
-                _model = value;
+                // Update the formationId to match the new model
+                UpdateVideoId();
 
-                if (_model != null)
-                {
-                    //Debug.Log("in VideoSelectSyncModel");
-                    // Update the video id to match the new model
-                    UpdateVideoId();
-
-                    // Register for events so we'll know if the value changes later
-                    _model.videoIdDidChange += VideoIdDidChange;
-                }
+                // Register for events so we'll know if the value changes later
+                currentModel.videoIdDidChange += VideoIdDidChange;
             }
         }
+
+        //private VideoSelectSyncModel model
+        //{
+        //    set
+        //    {
+        //        //Debug.Log("In VideoSelectSyncModel");
+
+        //        if (_model != null)
+        //        {
+        //            // Unregister from events
+        //            _model.videoIdDidChange -= VideoIdDidChange;
+        //        }
+
+        //        // Store the model
+        //        _model = value;
+
+        //        if (_model != null)
+        //        {
+        //            //Debug.Log("in VideoSelectSyncModel");
+        //            // Update the video id to match the new model
+        //            UpdateVideoId();
+
+        //            // Register for events so we'll know if the value changes later
+        //            _model.videoIdDidChange += VideoIdDidChange;
+        //        }
+        //    }
+        //}
 
         private void VideoIdDidChange(VideoSelectSyncModel model, int value)
         {
@@ -49,16 +76,32 @@ namespace Assets.Scripts
         {
             Debug.Log("UpdateVideoId");
 
-            if (_model != null && _model.videoId > 0)
+            if (model != null && model.videoId > 0)
             {
                 // Get the value from the model, display it 
-                _videoSelectDisplay.SetVideoId(_model.videoId);
+                _videoSelectDisplay.SetVideoId(model.videoId);
 
                 Debug.Log("Sync: Selected video clip updated");
 
-                MediaDisplayManager.instance.SelectedVideo = _model.videoId;
+                MediaDisplayManager.instance.SelectedVideo = model.videoId;
             }
         }
+
+
+        //private void UpdateVideoId()
+        //{
+        //    Debug.Log("UpdateVideoId");
+
+        //    if (_model != null && _model.videoId > 0)
+        //    {
+        //        // Get the value from the model, display it 
+        //        _videoSelectDisplay.SetVideoId(_model.videoId);
+
+        //        Debug.Log("Sync: Selected video clip updated");
+
+        //        MediaDisplayManager.instance.SelectedVideo = _model.videoId;
+        //    }
+        //}
 
         public void SetId(int id)
         {
@@ -66,7 +109,7 @@ namespace Assets.Scripts
 
             // Set the value on the model
             // This will fire the valueChanged event on the model, which will update the value for both the local player and all remote players
-            _model.videoId = id;
+            model.videoId = id;
         }
     }
 }

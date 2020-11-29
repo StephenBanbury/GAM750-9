@@ -141,22 +141,50 @@ namespace Assets.Scripts
             {
                 var gameManager = GameObject.Find("GameManager");
 
+                var videoSelect = gameManager.GetComponent<VideoSelect>();
+                var streamSelect = gameManager.GetComponent<StreamSelect>();
+                var displaySelect = gameManager.GetComponent<DisplaySelect>();
+
                 if (buffer.MediaTypeId == (int) MediaType.VideoClip)
                 {
-                    var videoSelect = gameManager.GetComponent<VideoSelect>();
                     videoSelect.SetVideoId(buffer.MediaId);
                     videoSelect.KeepInSync();
                 }
                 else
                 {
-                    var streamSelect = gameManager.GetComponent<StreamSelect>();
                     streamSelect.SetStreamId(buffer.MediaId);
                     streamSelect.KeepInSync();
                 }
 
-                var displaySelect = gameManager.GetComponent<DisplaySelect>();
                 displaySelect.SetDisplayId(buffer.ScreenDisplayId);
                 displaySelect.KeepInSync();
+
+
+                //var existing =
+                //    model.mediaScreenDisplayStates.FirstOrDefault(s => s.screenDisplayId == buffer.ScreenDisplayId);
+
+                //Debug.Log($"Realtime model exists: {existing != null}");
+
+                //if (existing != null)
+                //{
+                //    existing.mediaTypeId = buffer.MediaTypeId;
+                //    existing.mediaId = buffer.MediaId;
+                //}
+                //else
+                //{
+                //    var mediaState = new MediaScreenDisplayStateModel
+                //    {
+                //        mediaTypeId = buffer.MediaTypeId,
+                //        mediaId = buffer.MediaId,
+                //        screenDisplayId = buffer.ScreenDisplayId
+                //    };
+
+                //    Debug.Log($"Realtime mediaState: {mediaState}");
+
+                //    model.mediaScreenDisplayStates.Add(mediaState);
+                //}
+
+
             }
 
             _preparedStateBuffer.Clear();

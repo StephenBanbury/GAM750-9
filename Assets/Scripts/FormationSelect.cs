@@ -52,8 +52,8 @@ namespace Assets.Scripts
 
             if (compoundId != _previousId)
             {
-                _formationSelectSync.SetId(compoundId);
                 _previousId = compoundId;
+                _formationSelectSync.SetId(compoundId);
             }
         }
     }
