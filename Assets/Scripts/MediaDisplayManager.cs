@@ -569,12 +569,12 @@ namespace Assets.Scripts
                 var videoPlayer = videoDisplay.GetComponentInChildren<VideoPlayer>();
 
                 //Add AudioSource
-                AudioSource audioSource = gameObject.AddComponent<AudioSource>();
+                //AudioSource audioSource = gameObject.AddComponent<AudioSource>();
 
                 //Disable Play on Awake for both Video and Audio
                 videoPlayer.playOnAwake = false;
-                audioSource.playOnAwake = false;
-                audioSource.Pause();
+                //audioSource.playOnAwake = false;
+                //audioSource.Pause();
 
                 if (thisVideoClip.Source == Source.Url)
                 {
@@ -593,11 +593,11 @@ namespace Assets.Scripts
                 }
 
                 //Set Audio Output to AudioSource
-                videoPlayer.audioOutputMode = VideoAudioOutputMode.AudioSource;
+                //videoPlayer.audioOutputMode = VideoAudioOutputMode.AudioSource;
 
                 //Assign the Audio from Video to AudioSource to be played
-                videoPlayer.EnableAudioTrack(0, true);
-                videoPlayer.SetTargetAudioSource(0, audioSource);
+                //videoPlayer.EnableAudioTrack(0, true);
+                //videoPlayer.SetTargetAudioSource(0, audioSource);
 
                 // TODO test to see if this speeds up or slows down video play start
                 //Set video To Play then prepare Audio to prevent Buffering        
@@ -606,7 +606,7 @@ namespace Assets.Scripts
                 //Play Video
                 videoPlayer.Play();
                 //Play Sound
-                audioSource.Play();
+                //audioSource.Play();
             }
         }
 
