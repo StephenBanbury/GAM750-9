@@ -14,31 +14,31 @@ namespace Assets.Scripts
             _displaySelect = GetComponent<DisplaySelect>();
         }
 
-        protected override void OnRealtimeModelReplaced(DisplaySelectSyncModel previousModel,
-            DisplaySelectSyncModel currentModel)
-        {
-            Debug.Log($"PreviousModel: {previousModel != null}");
-            Debug.Log($"CurrentModel: {currentModel != null}");
+        //protected override void OnRealtimeModelReplaced(DisplaySelectSyncModel previousModel,
+        //    DisplaySelectSyncModel currentModel)
+        //{
+        //    Debug.Log($"PreviousModel: {previousModel != null}");
+        //    Debug.Log($"CurrentModel: {currentModel != null}");
 
-            if (previousModel != null)
-            {
-                // Unregister from events
-                previousModel.displayIdDidChange -= DisplayIdDidChange;
-            }
+        //    if (previousModel != null)
+        //    {
+        //        // Unregister from events
+        //        previousModel.displayIdDidChange -= DisplayIdDidChange;
+        //    }
 
-            if (currentModel != null)
-            {
-                // If this is a model that has no data set on it, populate it with the current value.
-                if (currentModel.isFreshModel)
-                    currentModel.displayId = _displayId;
+        //    if (currentModel != null)
+        //    {
+        //        // If this is a model that has no data set on it, populate it with the current value.
+        //        if (currentModel.isFreshModel)
+        //            currentModel.displayId = _displayId;
 
-                // Update the formationId to match the new model
-                UpdateDisplayId();
+        //        // Update the formationId to match the new model
+        //        UpdateDisplayId();
 
-                // Register for events so we'll know if the value changes later
-                currentModel.displayIdDidChange += DisplayIdDidChange;
-            }
-        }
+        //        // Register for events so we'll know if the value changes later
+        //        currentModel.displayIdDidChange += DisplayIdDidChange;
+        //    }
+        //}
 
         //private DisplaySelectSyncModel model
         //{
@@ -64,27 +64,27 @@ namespace Assets.Scripts
         //    }
         //}
 
-        private void DisplayIdDidChange(DisplaySelectSyncModel model, int value)
-        {
-            UpdateDisplayId();
-        }
+        //private void DisplayIdDidChange(DisplaySelectSyncModel model, int value)
+        //{
+        //    UpdateDisplayId();
+        //}
 
-        private void UpdateDisplayId()
-        {
-            Debug.Log("UpdateDisplayId");
+        //private void UpdateDisplayId()
+        //{
+        //    Debug.Log("UpdateDisplayId");
 
-            if (model != null && model.displayId > 0)
-            {
-                // Get the value from the model, display it and update the video display manager
-                _displaySelect.SetDisplayId(model.displayId);
+        //    if (model != null && model.displayId > 0)
+        //    {
+        //        // Get the value from the model, display it and update the video display manager
+        //        _displaySelect.SetDisplayId(model.displayId);
                 
-                //Debug.Log("Sync: Selected display updated");
+        //        //Debug.Log("Sync: Selected display updated");
                 
-                //MediaDisplayManager.instance.SelectedDisplay = model.displayId;
-                //MediaDisplayManager.instance.StoreScreenDisplayState();
-                MediaDisplayManager.instance.AssignMediaToDisplay();
-            }
-        }
+        //        //MediaDisplayManager.instance.SelectedDisplay = model.displayId;
+        //        //MediaDisplayManager.instance.StoreScreenDisplayState();
+        //        MediaDisplayManager.instance.AssignMediaToDisplay();
+        //    }
+        //}
 
         //private void UpdateDisplayId()
         //{

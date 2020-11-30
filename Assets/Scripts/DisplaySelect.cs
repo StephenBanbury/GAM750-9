@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Assets.Scripts.Enums;
+using UnityEngine;
 using UnityEngine.UI;
 
 namespace Assets.Scripts
