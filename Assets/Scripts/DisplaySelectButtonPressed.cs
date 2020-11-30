@@ -29,8 +29,8 @@ namespace Assets.Scripts
                 var gameManager = GameObject.Find("GameManager");
 
                 var displaySelect = gameManager.GetComponent<DisplaySelect>();
-                displaySelect.SetDisplayId(compositeId);
-                displaySelect.KeepInSync();
+                //displaySelect.SetDisplayId(compositeId);
+                displaySelect.KeepInSync(compositeId);
 
                 _displayIdText.text = _displayId.ToString();
             }

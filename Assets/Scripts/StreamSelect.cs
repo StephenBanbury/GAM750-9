@@ -5,7 +5,7 @@ namespace Assets.Scripts
 {
     public class StreamSelect : MonoBehaviour
     {
-        private int _streamId;
+        //private int _streamId;
         private int _previousId;
         
         private StreamSelectSync _streamSelectSync;
@@ -19,24 +19,24 @@ namespace Assets.Scripts
         {
             Debug.Log($"SetStreamId: {id}");
 
-            _streamId = id;
+            //_streamId = id;
 
-            if (_streamId > 0 && _streamId != _previousId)
+            if (id > 0 && id != _previousId)
             {
-                MediaDisplayManager.instance.SelectedStream = _streamId;
+                MediaDisplayManager.instance.SelectedStream = id;
                 MediaDisplayManager.instance.SelectedMediaType = MediaType.VideoStream;
             }
         }
 
-        public void KeepInSync()
+        public void KeepInSync(int id)
         {
             // If the id has changed, call SetId on the sync component
-            if (_streamId != _previousId)
+            if (id != _previousId)
             {
-                Debug.Log($"streamId: {_streamId}");
-                _previousId = _streamId;
+                Debug.Log($"streamId: {id}");
 
-                _streamSelectSync.SetId(_streamId);
+                _streamSelectSync.SetId(id);
+                _previousId = id;
             }
         }
     }

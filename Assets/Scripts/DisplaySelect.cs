@@ -5,7 +5,7 @@ namespace Assets.Scripts
 {
     public class DisplaySelect : MonoBehaviour
     {
-        private int _displayId;
+        //private int _displayId;
         private int _previousId;
 
         private DisplaySelectSync _displaySelectSync;
@@ -19,17 +19,18 @@ namespace Assets.Scripts
         public void SetDisplayId(int id)
         {
             Debug.Log($"SetDisplayeId: {id}");
+            Debug.Log($"_previousId: {_previousId}");
 
-            _displayId = id;
+            //_displayId = id;
             
-            if (_displayId > 0 && _displayId != _previousId)
+            if (id > 0 && id != _previousId)
             {
-                MediaDisplayManager.instance.SelectedDisplay = _displayId;
+                MediaDisplayManager.instance.SelectedDisplay = id;
                 MediaDisplayManager.instance.StoreRealtimeScreenMediaState();
             }
         }
 
-        public void KeepInSync()
+        public void KeepInSync(int id)
         {
             // If the id has changed, call SetId on the sync component
             //if (_displayId != _previousId)
@@ -37,10 +38,10 @@ namespace Assets.Scripts
 
             // TODO: check display plus media type and id have not changed
 
-            Debug.Log($"Keep in sync: displayId: {_displayId}");
+            Debug.Log($"Keep in sync: displayId: {id}");
 
-            _previousId = _displayId;
-            _displaySelectSync.SetId(_displayId);
+            _displaySelectSync.SetId(id);
+            _previousId = id;
             //}
         }
     }

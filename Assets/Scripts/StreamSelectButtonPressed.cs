@@ -17,8 +17,8 @@ namespace Assets.Scripts
 
                 var gameManager = GameObject.Find("GameManager");
                 var streamSelect = gameManager.GetComponent<StreamSelect>();
-                streamSelect.SetStreamId(StreamId);
-                streamSelect.KeepInSync();
+                //streamSelect.SetStreamId(StreamId);
+                streamSelect.KeepInSync(StreamId);
             }
         }
     }

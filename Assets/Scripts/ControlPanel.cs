@@ -147,80 +147,21 @@ namespace Assets.Scripts
 
                 if (buffer.MediaTypeId == (int) MediaType.VideoClip)
                 {
-                    videoSelect.SetVideoId(buffer.MediaId);
-                    videoSelect.KeepInSync();
+                    //videoSelect.SetVideoId(buffer.MediaId);
+                    videoSelect.KeepInSync(buffer.MediaId);
                 }
                 else
                 {
-                    streamSelect.SetStreamId(buffer.MediaId);
-                    streamSelect.KeepInSync();
+                    //streamSelect.SetStreamId(buffer.MediaId);
+                    streamSelect.KeepInSync(buffer.MediaId);
                 }
 
-                displaySelect.SetDisplayId(buffer.ScreenDisplayId);
-                displaySelect.KeepInSync();
-
-
-                //var existing =
-                //    model.mediaScreenDisplayStates.FirstOrDefault(s => s.screenDisplayId == buffer.ScreenDisplayId);
-
-                //Debug.Log($"Realtime model exists: {existing != null}");
-
-                //if (existing != null)
-                //{
-                //    existing.mediaTypeId = buffer.MediaTypeId;
-                //    existing.mediaId = buffer.MediaId;
-                //}
-                //else
-                //{
-                //    var mediaState = new MediaScreenDisplayStateModel
-                //    {
-                //        mediaTypeId = buffer.MediaTypeId,
-                //        mediaId = buffer.MediaId,
-                //        screenDisplayId = buffer.ScreenDisplayId
-                //    };
-
-                //    Debug.Log($"Realtime mediaState: {mediaState}");
-
-                //    model.mediaScreenDisplayStates.Add(mediaState);
-                //}
-
-
+                //displaySelect.SetDisplayId(buffer.ScreenDisplayId);
+                displaySelect.KeepInSync(buffer.ScreenDisplayId);
             }
 
             _preparedStateBuffer.Clear();
         }
-
-        //public void Apply()
-        //{
-        //    foreach (var buffer in _preparedStateBuffer)
-        //    {
-        //        var existing =
-        //            model.mediaScreenDisplayStates.FirstOrDefault(s => s.screenDisplayId == buffer.ScreenDisplayId);
-
-        //        Debug.Log($"Realtime model exists: {existing != null}");
-
-        //        if (existing != null)
-        //        {
-        //            existing.mediaTypeId = buffer.MediaTypeId;
-        //            existing.mediaId = buffer.MediaId;
-        //        }
-        //        else
-        //        {
-        //            var mediaState = new MediaScreenDisplayStateModel
-        //            {
-        //                mediaTypeId = buffer.MediaTypeId,
-        //                mediaId = buffer.MediaId,
-        //                screenDisplayId = buffer.ScreenDisplayId
-        //            };
-
-        //            Debug.Log($"Realtime mediaState: {mediaState}");
-
-        //            model.mediaScreenDisplayStates.Add(mediaState);
-        //        }
-        //    }
-
-        //    _preparedStateBuffer.Clear();
-        //}
 
         public void Clear()
         {

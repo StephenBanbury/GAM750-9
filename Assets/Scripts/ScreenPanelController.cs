@@ -176,7 +176,7 @@ namespace Assets.Scripts
                 FormationSelect formationSelect = gameManager.GetComponent<FormationSelect>();
 
                 formationSelect.SetFormationId(scene, (int) _currentScreenFormation, 10);
-                formationSelect.KeepInSync();
+                formationSelect.KeepInSync((int) _currentScreenFormation);
             }
         }
 
@@ -201,12 +201,12 @@ namespace Assets.Scripts
                 var gameManager = GameObject.Find("GameManager");
 
                 var videoSelect = gameManager.GetComponent<VideoSelect>();
-                videoSelect.SetVideoId(videoId);
-                videoSelect.KeepInSync();
+                //videoSelect.SetVideoId(videoId);
+                videoSelect.KeepInSync(videoId);
 
                 var displaySelect = gameManager.GetComponent<DisplaySelect>();
-                displaySelect.SetDisplayId(screenId);
-                displaySelect.KeepInSync();
+                //displaySelect.SetDisplayId(screenId);
+                displaySelect.KeepInSync(videoId);
             }
         }
 
@@ -225,8 +225,8 @@ namespace Assets.Scripts
                 var gameManager = GameObject.Find("GameManager");
 
                 var streamSelect = gameManager.GetComponent<StreamSelect>();
-                streamSelect.SetStreamId(streamId);
-                streamSelect.KeepInSync();
+                //streamSelect.SetStreamId(streamId);
+                streamSelect.KeepInSync(streamId);
 
                 var displaySelect = gameManager.GetComponent<DisplaySelect>();
                 displaySelect.SetDisplayId(screenId);

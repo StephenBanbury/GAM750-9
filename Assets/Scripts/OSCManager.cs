@@ -21,29 +21,29 @@ namespace Assets.Scripts
         public void OnReceiveVideoId(int value)
         {
             Debug.Log($"VideoId: {value}");
-            _videoSelectDisplay.SetVideoId(value);
-            _videoSelectDisplay.KeepInSync();
+           // _videoSelectDisplay.SetVideoId(value);
+            _videoSelectDisplay.KeepInSync(value);
         }
 
         public void OnReceiveStreamId(int value)
         {
             Debug.Log($"StreamId: {value}");
-            _streamSelectDisplay.SetStreamId(value);
-            _streamSelectDisplay.KeepInSync();
+           // _streamSelectDisplay.SetStreamId(value);
+            _streamSelectDisplay.KeepInSync(value);
         }
 
         public void OnReceiveDisplayId(int value)
         {
             Debug.Log($"DisplayId: {value}");
-            _displaySelectDisplay.SetDisplayId(value);
-            _displaySelectDisplay.KeepInSync();
+            //_displaySelectDisplay.SetDisplayId(value);
+            _displaySelectDisplay.KeepInSync(value);
         }
 
         public void OnReceiveFormationId(int value)
         {
             Debug.Log($"FormationId: {value}");
-            _formationSelectDisplay.SetFormationId(value, 10);
-            _formationSelectDisplay.KeepInSync();
+            //_formationSelectDisplay.SetFormationId(value, 10);
+            _formationSelectDisplay.KeepInSync(value);
         }
     }
 }

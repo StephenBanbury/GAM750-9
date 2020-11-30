@@ -5,7 +5,7 @@ namespace Assets.Scripts
 {
     public class VideoSelect : MonoBehaviour
     {
-        private int _videoId;
+        //private int _videoId;
         private int _previousId;
         
         private VideoSelectSync _videoSelectSync;
@@ -19,24 +19,24 @@ namespace Assets.Scripts
         {
             Debug.Log($"SetVideoId: {id}");
 
-            _videoId = id;
+            //_videoId = id;
 
-            if (_videoId > 0 && _videoId != _previousId)
+            if (id > 0 && id != _previousId)
             {
-                MediaDisplayManager.instance.SelectedVideo = _videoId;
+                MediaDisplayManager.instance.SelectedVideo = id;
                 MediaDisplayManager.instance.SelectedMediaType = MediaType.VideoClip;
             }
         }
 
-        public void KeepInSync()
+        public void KeepInSync(int id)
         {
             // If the id has changed, call SetId on the sync component
-            if (_videoId != _previousId)
+            if (id != _previousId)
             {
-                Debug.Log($"videoId: {_videoId}");
+                Debug.Log($"videoId: {id}");
 
-                _previousId = _videoId;
-                _videoSelectSync.SetId(_videoId);
+                _videoSelectSync.SetId(id);
+                _previousId = id;
             }
         }
     }

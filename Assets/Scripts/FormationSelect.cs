@@ -8,7 +8,7 @@ namespace Assets.Scripts
     {
         //[SerializeField] private Text _formationIdText;
 
-        private int _formationId;
+        //private int _formationId;
         private int _previousId;
         private int _scene;
         
@@ -22,38 +22,38 @@ namespace Assets.Scripts
 
         public void SetFormationId(int id, int animationSeconds)
         {
-            _formationId = id;
+            //_formationId = id;
 
-            if (_formationId > 0 && _formationId != _previousId)
+            if (id > 0 && id != _previousId)
             {
-                MediaDisplayManager.instance.TweenScreens((ScreenFormation)_formationId, animationSeconds);
+                MediaDisplayManager.instance.TweenScreens((ScreenFormation)id, animationSeconds);
             }
         }
 
         public void SetFormationId(Scene scene, int id, int animationSeconds)
         {
-            _formationId = id;
-            _scene = (int) scene;
+            //_formationId = id;
+            //_scene = (int) scene;
 
-            if (_formationId > 0 && _formationId != _previousId)
+            if (id > 0 && id != _previousId)
             {
-                MediaDisplayManager.instance.TweenScreens(scene, (ScreenFormation)_formationId, animationSeconds);
+                MediaDisplayManager.instance.TweenScreens(scene, (ScreenFormation)id, animationSeconds);
             }
         }
 
-        public void KeepInSync()
+        public void KeepInSync(int id)
         {
             // generate cross-scene id
 
             // create id in 'composite' form, e.g. 12 = scene 1, formation 2.
 
-            string scenePlusFormation = $"{_scene}{_formationId}";
+            string scenePlusFormation = $"{_scene}{id}";
             int compoundId = int.Parse(scenePlusFormation);
 
             if (compoundId != _previousId)
             {
-                _previousId = compoundId;
                 _formationSelectSync.SetId(compoundId);
+                _previousId = compoundId;
             }
         }
     }

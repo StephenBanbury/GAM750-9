@@ -265,7 +265,7 @@ namespace Assets.Scripts
             }
 
             _lobbyStatusInfoText.text += "\nFinished.";
-            _startButton.SetActive(true);
+            //_startButton.SetActive(true);
         }
 
         // TODO: remove - not used

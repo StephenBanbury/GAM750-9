@@ -22,9 +22,9 @@ namespace Assets.Scripts
                     var gameManager = GameObject.Find("GameManager");
                     var formationSelect = gameManager.GetComponent<FormationSelect>();
 
-                    formationSelect.SetFormationId(scene, _formationId, 10);
+                    //formationSelect.SetFormationId(scene, _formationId, 10);
 
-                    formationSelect.KeepInSync();
+                    formationSelect.KeepInSync(_formationId);
 
                     _formationIdText.text = _formationId.ToString();
                 }

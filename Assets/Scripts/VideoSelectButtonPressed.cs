@@ -16,8 +16,8 @@ namespace Assets.Scripts
 
                 var gameManager = GameObject.Find("GameManager");
                 var videoSelect = gameManager.GetComponent<VideoSelect>();
-                videoSelect.SetVideoId(_videoId);
-                videoSelect.KeepInSync();
+                //videoSelect.SetVideoId(_videoId);
+                videoSelect.KeepInSync(_videoId);
 
                 _videoIdText.text = _videoId.ToString();
             }
