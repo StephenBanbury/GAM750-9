@@ -21,27 +21,30 @@ namespace Assets.Scripts
     {
         public static MediaDisplayManager instance;
 
-        private int _sceneIndex;
-
-        private int _lastSelectedVideoId;
-        private int _lastSelectedStreamId;
-
-        private int _lastSelectedDisplayId;
-        private MediaType _lastSelectedMediaType;
-
-        private float _floorAdjust = 1.25f;
-
         [SerializeField] private VideoClip[] _videoClips = new VideoClip[5];
         [SerializeField] private Transform _streamButton;
         [SerializeField] private GameObject _screen;
         [SerializeField] private GameObject _screenVariant;
         [SerializeField] private AudioSource _sceneAudio;
         [SerializeField] private GameObject _sceneLights;
-        [SerializeField] private GameObject _selectionPanels;
-        [SerializeField] private Text _lobbyStatusInfoText;
-        [SerializeField] private GameObject _startButton;
+        //[SerializeField] private GameObject _selectionPanels;
+        //[SerializeField] private Text _lobbyStatusInfoText;
+        //[SerializeField] private GameObject _startButton;
         [SerializeField] private Text _debugText;
-        [SerializeField] private Text _hudText;
+        //[SerializeField] private Text _hudText;
+        [SerializeField] private Text _bufferText;
+
+        private int _sceneIndex;
+        private int _lastSelectedVideoId;
+        private int _lastSelectedStreamId;
+        private int _lastSelectedDisplayId;
+        private MediaType _lastSelectedMediaType;
+        private float _floorAdjust = 1.25f;
+        private List<MediaScreenDisplayBufferState> _preparedStateBuffer;
+        private MediaScreenDisplayBufferState _preparedState;
+        private int _currentSceneId;
+        private int _currentVideoClip;
+        private int _currentVideoStream;
 
         public int SelectedVideo { set => _lastSelectedVideoId = value; }
         public int SelectedStream { set => _lastSelectedStreamId = value; }
@@ -52,8 +55,9 @@ namespace Assets.Scripts
         public Scene MyCurrentScene { get; set; }
         public List<MediaDetail> Videos { get; private set; }
         public List<ScreenActionModel> ScreenActions { get; private set; }
-
         public List<int> ScreensAsPortal { get; set; }
+
+
 
         void Awake()
         {
@@ -67,27 +71,6 @@ namespace Assets.Scripts
             }
             DontDestroyOnLoad(gameObject);
         }
-
-
-
-
-        public class MediaScreenDisplayBufferState
-        {
-            public int MediaTypeId;
-            public int MediaId;
-            public int ScreenDisplayId;
-            public bool IsPortal;
-        }
-
-        [SerializeField] private Text _bufferText;
-
-        private List<MediaScreenDisplayBufferState> _preparedStateBuffer;
-        private MediaScreenDisplayBufferState _preparedState;
-
-        private int _currentSceneId;
-        private int _currentVideoClip;
-        private int _currentVideoStream;
-
 
         void Start()
         {
@@ -113,10 +96,7 @@ namespace Assets.Scripts
         protected override void OnRealtimeModelReplaced(MediaScreenDisplayModel previousModel,
             MediaScreenDisplayModel currentModel)
         {
-            // Clear Mesh
-            //_mesh.ClearRibbon();
-
-            // TODO: Clear screens
+            // TODO: Clear screens?
 
             Debug.Log("OnRealtimeModelReplaced");
 
@@ -142,12 +122,11 @@ namespace Assets.Scripts
 
         public void AssignMediaToDisplaysFromArray()
         {
-
-            Debug.Log("AssignMediaToDisplaysFromArray: -");
-            foreach (var modelMediaScreenDisplayState in model.mediaScreenDisplayStates)
-            {
-                Debug.Log($"{(MediaType)modelMediaScreenDisplayState.mediaTypeId} to {modelMediaScreenDisplayState.screenDisplayId}");
-            }
+            //Debug.Log("AssignMediaToDisplaysFromArray: -");
+            //foreach (var modelMediaScreenDisplayState in model.mediaScreenDisplayStates)
+            //{
+            //    Debug.Log($"{(MediaType)modelMediaScreenDisplayState.mediaTypeId} to {modelMediaScreenDisplayState.screenDisplayId}");
+            //}
 
             foreach (var mediaInfo in model.mediaScreenDisplayStates)
             {
@@ -169,16 +148,11 @@ namespace Assets.Scripts
                 Debug.Log($"Assign portal to display {mediaInfo.screenDisplayId}?: {mediaInfo.isPortal}");
                 AssignPortalToScreen(mediaInfo.screenDisplayId, mediaInfo.isPortal);
             }
-
-            Debug.Log("AssignMediaToDisplaysFromArray: -");
-            foreach (var modelMediaScreenDisplayState in model.mediaScreenDisplayStates)
-            {
-                Debug.Log($"{(MediaType)modelMediaScreenDisplayState.mediaTypeId} to {modelMediaScreenDisplayState.screenDisplayId}");
-            }
         }
 
 
 
+        #region Controller UI
 
         public void SceneSelect(int id)
         {
@@ -251,27 +225,6 @@ namespace Assets.Scripts
         {
             foreach (var buffer in _preparedStateBuffer)
             {
-                //var gameManager = GameObject.Find("GameManager");
-
-                //var videoSelect = gameManager.GetComponent<VideoSelect>();
-                //var streamSelect = gameManager.GetComponent<StreamSelect>();
-                //var displaySelect = gameManager.GetComponent<DisplaySelect>();
-
-                //if (buffer.MediaTypeId == (int) MediaType.VideoClip)
-                //{
-                //    //videoSelect.SetVideoId(buffer.MediaId);
-                //    videoSelect.KeepInSync(buffer.MediaId);
-                //}
-                //else
-                //{
-                //    //streamSelect.SetStreamId(buffer.MediaId);
-                //    streamSelect.KeepInSync(buffer.MediaId);
-                //}
-
-                ////displaySelect.SetDisplayId(buffer.ScreenDisplayId);
-                //displaySelect.KeepInSync(buffer.ScreenDisplayId);
-
-
                 var existing =
                     model.mediaScreenDisplayStates.FirstOrDefault(s => s.screenDisplayId == buffer.ScreenDisplayId);
 
@@ -299,11 +252,11 @@ namespace Assets.Scripts
 
                 }
 
-                Debug.Log("Apply: -");
-                foreach (var modelMediaScreenDisplayState in model.mediaScreenDisplayStates)
-                {
-                    Debug.Log($"{(MediaType)modelMediaScreenDisplayState.mediaTypeId} to {modelMediaScreenDisplayState.screenDisplayId}");
-                }
+                //Debug.Log("Apply: -");
+                //foreach (var modelMediaScreenDisplayState in model.mediaScreenDisplayStates)
+                //{
+                //    Debug.Log($"{(MediaType)modelMediaScreenDisplayState.mediaTypeId} to {modelMediaScreenDisplayState.screenDisplayId}");
+                //}
             }
 
             _preparedStateBuffer.Clear();
@@ -347,47 +300,8 @@ namespace Assets.Scripts
             return int.Parse(scene);
         }
 
+#endregion
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-       
 
         private IEnumerator AwaitVideosFromApiBeforeStart()
         {
@@ -529,7 +443,7 @@ namespace Assets.Scripts
         private IEnumerator DownloadVideoFiles(List<MediaDetail> mediaDetails)
         {
             Debug.Log("Downloading video files: -");
-            _lobbyStatusInfoText.text = "Downloading video files: -";
+            //_lobbyStatusInfoText.text = "Downloading video files: -";
             _debugText.text = "Saving video file to: ";
 
             foreach (var mediaDetail in mediaDetails.Where(m => m.Source == Source.Url))
@@ -548,15 +462,15 @@ namespace Assets.Scripts
                 mediaDetail.LocalPath = savePath;
 
                 _debugText.text += $"\n{savePath}";
-                _lobbyStatusInfoText.text += $"\n{mediaDetail.Filename}";
+                //_lobbyStatusInfoText.text += $"\n{mediaDetail.Filename}";
 
                 if (File.Exists(savePath))
                 {
-                    _lobbyStatusInfoText.text += " - exists.";
+                    //_lobbyStatusInfoText.text += " - exists.";
                 }
                 else
                 {
-                    _lobbyStatusInfoText.text += " - downloading.";
+                    //_lobbyStatusInfoText.text += " - downloading.";
                     string url = mediaDetail.Url;
                     using (UnityWebRequest www = UnityWebRequest.Get(url))
                     {
@@ -579,22 +493,10 @@ namespace Assets.Scripts
                 }
             }
 
-            _lobbyStatusInfoText.text += "\nFinished.";
+            //_lobbyStatusInfoText.text += "\nFinished.";
             //_startButton.SetActive(true);
         }
 
-        // TODO: remove - not used
-        public void OffsetPlayerPositionWithinScene()
-        {
-            var sceneService = new SceneService(MyCurrentScene);
-            var offset = sceneService.GetScenePosition();
-            var player = GameObject.Find("Player");
-            player.transform.position = player.transform.position + offset;
-
-            Debug.Log($"player.transform.position: {player.transform.position}");
-            Debug.Log($"Offset: {offset}");
-            Debug.Log($"New position: {player.transform.position + offset}");
-        }
 
         public void CreateStreamSelectButtons()
         {
@@ -700,93 +602,7 @@ namespace Assets.Scripts
             Videos.AddRange(videosFromApi);
         }
 
-        //private void MediaAssignedToDisplay(RealtimeArray<MediaScreenDisplayStateModel> mediaScreenDisplayStates, MediaScreenDisplayStateModel mediaScreenDisplayState, bool remote)
-        //{
-        //    Debug.Log("MediaAssignedToDisplay");
-        //    //AssignMediaToDisplay();
-        //    AssignMediaToDisplaysFromArray();
-        //}
-
-        //protected override void OnRealtimeModelReplaced(MediaScreenDisplayModel previousModel, MediaScreenDisplayModel currentModel)
-        //{
-        //    // Clear Mesh
-        //    //_mesh.ClearRibbon();
-
-        //    // TODO: Clear screens
-
-        //    Debug.Log("OnRealtimeModelReplaced");
-
-        //    if (previousModel != null)
-        //    {
-        //        Debug.Log("previousModel != null");
-
-        //        // Unregister from events
-        //        previousModel.mediaScreenDisplayStates.modelAdded -= MediaAssignedToDisplay;
-        //    }
-
-
-        //    if (currentModel != null)
-        //    {
-        //        Debug.Log($"currentModel != null. Models: {currentModel.mediaScreenDisplayStates.Count}");
-        //        AssignMediaToDisplaysFromArray();
-
-        //        // Let us know when a new screen has changed 
-        //        currentModel.mediaScreenDisplayStates.modelAdded += MediaAssignedToDisplay;
-        //    }
-        //}
-
-        //public void AssignMediaToDisplay()
-        //{
-        //    switch (_lastSelectedMediaType)
-        //    {
-        //        case MediaType.VideoClip:
-        //            Debug.Log($"Assign video clip {_lastSelectedVideoId} to display {_lastSelectedDisplayId}");
-        //            AssignVideoToDisplay(_lastSelectedVideoId, _lastSelectedDisplayId);
-        //            break;
-
-        //        case MediaType.VideoStream:
-        //            Debug.Log($"Assign video stream {_lastSelectedStreamId} to display {_lastSelectedDisplayId}");
-        //            AssignStreamToDisplay(_lastSelectedStreamId, _lastSelectedDisplayId);
-        //            break;
-        //    }
-        //}
-
-        //public void AssignMediaToDisplaysFromArray()
-        //{
-
-        //    Debug.Log("AssignMediaToDisplaysFromArray: -");
-        //    foreach (var modelMediaScreenDisplayState in model.mediaScreenDisplayStates)
-        //    {
-        //        Debug.Log($"{(MediaType)modelMediaScreenDisplayState.mediaTypeId} to {modelMediaScreenDisplayState.screenDisplayId}");
-        //    }
-
-        //    foreach (var mediaInfo in model.mediaScreenDisplayStates)
-        //    {
-        //        Debug.Log($"AssignMediaToDisplaysFromArray. mediaInfo: {mediaInfo.screenDisplayId}");
-
-        //        switch (mediaInfo.mediaTypeId)
-        //        {
-        //            case (int)MediaType.VideoClip:
-        //                Debug.Log($"Assign video clip {mediaInfo.mediaId} to display {mediaInfo.screenDisplayId}");
-        //                AssignVideoToDisplay(mediaInfo.mediaId, mediaInfo.screenDisplayId);
-        //                break;
-
-        //            case (int)MediaType.VideoStream:
-        //                Debug.Log($"Assign video stream {mediaInfo.mediaId} to display {mediaInfo.screenDisplayId}");
-        //                AssignStreamToDisplay(mediaInfo.mediaId, mediaInfo.screenDisplayId);
-        //                break;
-        //        }
-
-        //        Debug.Log($"Assign portal to display {mediaInfo.screenDisplayId}?: {mediaInfo.isPortal}");
-        //        AssignPortalToScreen(mediaInfo.screenDisplayId, mediaInfo.isPortal);
-        //    }
-
-        //    Debug.Log("AssignMediaToDisplaysFromArray: -");
-        //    foreach (var modelMediaScreenDisplayState in model.mediaScreenDisplayStates)
-        //    {
-        //        Debug.Log($"{(MediaType)modelMediaScreenDisplayState.mediaTypeId} to {modelMediaScreenDisplayState.screenDisplayId}");
-        //    }
-        //}
+      
 
         public void StoreRealtimeScreenMediaState()
         {
@@ -1022,36 +838,12 @@ namespace Assets.Scripts
                 Transform screenObject = GetScreenObjectFromScreenId(screenId);
                 if (screenObject != null)
                 {
-                    Debug.Log($"Creating portal on '{screenObject.name}'");
+                    Debug.Log($"Removing portal on '{screenObject.name}'");
                     Transform portal = screenObject.Find("Portal");
                     portal.gameObject.SetActive(false);
                 }
             }
-
-
-            //HudShowPortals();
         }
-
-        //private void HudClear()
-        //{
-        //    _hudText.text = "";
-        //}
-
-        //private void HudShowPortals()
-        //{
-        //    //_hudText.text = "";
-        //    foreach (var i in ScreensAsPortal)
-        //    {
-        //        //_hudText.text += $"\nportal: {i}";
-        //        Debug.Log($"\nportal: {i}");
-        //    }
-        //}
-
-        //private void HudStartMessage(string message)
-        //{
-        //    //_hudText.text = $"\n{message}";
-        //    Debug.Log(message);
-        //}
 
         private void SpawnScene(Scene scene, ScreenFormation formation)
         {
@@ -1108,20 +900,20 @@ namespace Assets.Scripts
             var selectionPanelsTrans = sceneObject.transform.Find($"Selection Panel {_sceneIndex}");
             if (selectionPanelsTrans == null)
             {
-                GameObject selectionPanels = Instantiate(_selectionPanels, _selectionPanels.transform.position + scenePosition, Quaternion.identity);
-                selectionPanels.transform.SetParent(sceneObject.transform);
-                selectionPanels.name = $"Selection Panel {_sceneIndex}";
+                //GameObject selectionPanels = Instantiate(_selectionPanels, _selectionPanels.transform.position + scenePosition, Quaternion.identity);
+                //selectionPanels.transform.SetParent(sceneObject.transform);
+                //selectionPanels.name = $"Selection Panel {_sceneIndex}";
 
-                Text indicator = selectionPanels.transform.Find("SceneSelectorView/Canvas/SceneText").GetComponent<Text>();
-                if (indicator != null)
-                {
-                    indicator.text = sceneName;
-                }
+                //Text indicator = selectionPanels.transform.Find("SceneSelectorView/Canvas/SceneText").GetComponent<Text>();
+                //if (indicator != null)
+                //{
+                //    indicator.text = sceneName;
+                //}
 
-                foreach (Transform child in selectionPanels.transform)
-                {
-                    Debug.Log($"In selection panel: {child.name}");
-                }
+                //foreach (Transform child in selectionPanels.transform)
+                //{
+                //    Debug.Log($"In selection panel: {child.name}");
+                //}
 
                 //var indicator = texts.FirstOrDefault(t => t.name == "SceneIndicator");
                 //if (indicator != null) indicator.text = sceneName;
