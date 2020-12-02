@@ -25,7 +25,7 @@ namespace Assets.Scripts
             if (id > 0 && id != _previousId)
             {
                 //MediaDisplayManager.instance.SelectedDisplay = _portalDisplayId;
-                MediaDisplayManager.instance.CreatePortal(id, isActive);
+                //MediaDisplayManager.instance.CreatePortal(id, isActive);
             }
         }
 
