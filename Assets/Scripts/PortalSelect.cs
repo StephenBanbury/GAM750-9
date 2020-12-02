@@ -5,7 +5,7 @@ namespace Assets.Scripts
 {
     public class  PortalSelect : MonoBehaviour
     {
-        private int _portalDisplayId;
+        //private int _portalDisplayId;
         private int _previousId;
 
         private PortalSelectSync _portalSelectSync;
@@ -20,28 +20,21 @@ namespace Assets.Scripts
         {
             Debug.Log($"SetPortalDisplayId: {id}");
 
-            _portalDisplayId = id;
+            //_portalDisplayId = id;
             
-            if (_portalDisplayId > 0) // && _displayId != _previousId)
+            if (id > 0 && id != _previousId)
             {
                 //MediaDisplayManager.instance.SelectedDisplay = _portalDisplayId;
                 MediaDisplayManager.instance.CreatePortal(id, isActive);
             }
         }
 
-        public void KeepInSync()
+        public void KeepInSync(int id)
         {
-            // If the id has changed, call SetId on the sync component
-            //if (_displayId != _previousId)
-            //{
+            Debug.Log($"Keep in sync portalDisplayId: {id}");
 
-            // TODO: check display plus media type and id have not changed
-
-                Debug.Log($"Keep in sync: portalDisplayId: {_portalDisplayId}");
-
-                _portalSelectSync.SetId(_portalDisplayId);
-                _previousId = _portalDisplayId;
-            //}
+            _portalSelectSync.SetId(id);
+            _previousId = id;
         }
     }
 }

@@ -111,7 +111,7 @@ namespace Assets.Scripts
                     case ScreenAction.CreatePortal:
                         Debug.Log("Doing action: Create portal");
                         portalDisplaySelect.SetPortalDisplayId(screenId, true);
-                        portalDisplaySelect.KeepInSync();
+                        portalDisplaySelect.KeepInSync(screenId);
                         break;
 
                     case ScreenAction.DoTeleport:
@@ -122,7 +122,7 @@ namespace Assets.Scripts
                         MediaDisplayManager.instance.CreatePortal(screenId, false);
 
                         portalDisplaySelect.SetPortalDisplayId(screenId, false);
-                        portalDisplaySelect.KeepInSync();
+                        portalDisplaySelect.KeepInSync(screenId);
                         // Keep in sync
 
                         break;

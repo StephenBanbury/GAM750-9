@@ -30,10 +30,9 @@ namespace Assets.Scripts
 
         public void KeepInSync(int id)
         {
-            // If the id has changed, call SetId on the sync component
             if (id != _previousId)
             {
-                Debug.Log($"videoId: {id}");
+                Debug.Log($"KeepInSync videoId: {id}");
 
                 _videoSelectSync.SetId(id);
                 _previousId = id;

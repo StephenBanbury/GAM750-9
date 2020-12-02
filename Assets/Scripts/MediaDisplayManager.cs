@@ -40,12 +40,13 @@ namespace Assets.Scripts
         private int _lastSelectedDisplayId;
         private MediaType _lastSelectedMediaType;
         private float _floorAdjust = 1.25f;
-        private List<MediaScreenDisplayBufferState> _mediaStateBuffers;
+        private List<MediaScreenDisplayBufferState> _mediaStateBuffer;
         private List<MediaScreenDisplayBufferState> _mediaStatePreparationBuffer;
         private MediaScreenDisplayBufferState _mediaStatePreparation;
         private int _currentSceneId;
         private int _currentVideoClip;
         private int _currentVideoStream;
+        private int _compositeScreenId = 0;
 
         public int SelectedVideo { set => _lastSelectedVideoId = value; }
         public int SelectedStream { set => _lastSelectedStreamId = value; }
@@ -128,7 +129,7 @@ namespace Assets.Scripts
 
             foreach (var mediaInfo in model.mediaScreenDisplayStates)
             {
-                var exists = _mediaStateBuffers.FirstOrDefault(m =>
+                var exists = _mediaStateBuffer.FirstOrDefault(m =>
                     m.ScreenDisplayId == mediaInfo.screenDisplayId && m.MediaTypeId == mediaInfo.mediaTypeId &&
                     m.MediaId == mediaInfo.mediaId);
 
@@ -156,7 +157,7 @@ namespace Assets.Scripts
 
                     if (assigned)
                     {
-                        _mediaStateBuffers.Add(new MediaScreenDisplayBufferState
+                        _mediaStateBuffer.Add(new MediaScreenDisplayBufferState
                         {
                             MediaTypeId = mediaInfo.mediaTypeId,
                             MediaId = mediaInfo.mediaId,
@@ -214,12 +215,12 @@ namespace Assets.Scripts
 
         public void DisplaySelect(int id)
         {
-            int compoundId = CompoundScreenId(id);
+            int compositeId = CompoundScreenId(id);
 
             if (_mediaStatePreparation != null)
             {
                 var currentScreenState =
-                    _mediaStatePreparationBuffer.FirstOrDefault(s => s.ScreenDisplayId == compoundId);
+                    _mediaStatePreparationBuffer.FirstOrDefault(s => s.ScreenDisplayId == compositeId);
 
                 if (currentScreenState != null)
                 {
@@ -232,13 +233,29 @@ namespace Assets.Scripts
                     {
                         MediaTypeId = (int)(_currentVideoClip > 0 ? MediaType.VideoClip : MediaType.VideoStream),
                         MediaId = _currentVideoClip > 0 ? _currentVideoClip : _currentVideoStream,
-                        ScreenDisplayId = compoundId
+                        ScreenDisplayId = compositeId
                     });
                 }
 
-                DisplayBuffer();
+                DisplayBufferText();
             }
 
+            _compositeScreenId = compositeId;
+        }
+
+        public bool PortalSelect()
+        {
+            if (_compositeScreenId > 0)
+            {
+                var gameManager = GameObject.Find("GameManager");
+
+                var portalDisplaySelect = gameManager.GetComponent<PortalSelect>();
+                //portalDisplaySelect.SetPortalDisplayId(_compositeScreenId, true);
+                portalDisplaySelect.KeepInSync(_compositeScreenId);
+
+            }
+
+            return true;
         }
 
         public void Apply()
@@ -249,13 +266,15 @@ namespace Assets.Scripts
             _mediaStatePreparationBuffer.Clear();
         }
 
+
+
         public void Clear()
         {
             _mediaStatePreparationBuffer.Clear();
-            DisplayBuffer();
+            DisplayBufferText();
         }
 
-        private void DisplayBuffer()
+        private void DisplayBufferText()
         {
             _bufferText.text = "";
             foreach (var state in _mediaStatePreparationBuffer)
@@ -296,7 +315,7 @@ namespace Assets.Scripts
             Videos = new List<MediaDetail>();
             ScreensAsPortal = new List<int>();
             _mediaStatePreparationBuffer = new List<MediaScreenDisplayBufferState>();
-            _mediaStateBuffers = new List<MediaScreenDisplayBufferState>();
+            _mediaStateBuffer = new List<MediaScreenDisplayBufferState>();
 
             GetLocalVideosDetails();
 
@@ -598,7 +617,7 @@ namespace Assets.Scripts
             foreach (var prepBuffer in _mediaStatePreparationBuffer)
             {
                 var existing =
-                    _mediaStateBuffers.FirstOrDefault(s => s.ScreenDisplayId == prepBuffer.ScreenDisplayId);
+                    _mediaStateBuffer.FirstOrDefault(s => s.ScreenDisplayId == prepBuffer.ScreenDisplayId);
 
                 Debug.Log($"StoreBufferScreenMediaState. Exists: {existing != null}");
 
@@ -620,7 +639,7 @@ namespace Assets.Scripts
                         //isPortal = isPortal
                     };
 
-                    _mediaStateBuffers.Add(mediaScreenDisplayBufferState);
+                    _mediaStateBuffer.Add(mediaScreenDisplayBufferState);
                 }
             }
 
