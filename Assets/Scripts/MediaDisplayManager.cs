@@ -99,7 +99,7 @@ namespace Assets.Scripts
             Debug.Log("PortalAssignedToDisplay: -");
             foreach (var modelScreenPortalState in model.screenPortalStates)
             {
-                Debug.Log($"RealtimeArray: {(MediaType)modelScreenPortalState.screenId} is portal: {modelScreenPortalState.isPortal}");
+                Debug.Log($"RealtimeArray: {modelScreenPortalState.screenId} is portal: {modelScreenPortalState.isPortal}");
             }
 
             AssignPortalToDisplaysFromArray();
@@ -1010,27 +1010,18 @@ namespace Assets.Scripts
 
         private void AssignPortalToScreen(int screenId, bool isActive)
         {
-            //Debug.Log("AssignPortalToScreen");
-
             if (_screenPortalBuffer.Any(p => p.ScreenId == screenId))
             {
                 var screenAction = ScreenActions.FirstOrDefault(a => a.ScreenId == screenId);
 
                 if (isActive)
                 {
-                    //bool exists = ScreensAsPortal.IndexOf(screenId) != -1;
-
-                    //if (!exists)
-                    //{
                     Debug.Log($"Assigning portal to screen {screenId}");
-                    //ScreensAsPortal.Add(screenId);
                     screenAction.NextAction = ScreenAction.DoTeleport;
-                    //}
                 }
                 else
                 {
                     Debug.Log($"Removing portal on screen {screenId}");
-                    //ScreensAsPortal.RemoveAll(id => id == screenId);
                     screenAction.NextAction = ScreenAction.ChangeVideoClip;
                 }
 
