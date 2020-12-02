@@ -793,8 +793,21 @@ namespace Assets.Scripts
                 Debug.Log($"Change existing portal state from {existingRealtimeState.isPortal} to {!existingRealtimeState.isPortal}");
                 existingRealtimeState.isPortal = !existingRealtimeState.isPortal;
 
-                //var existingBufferState = _screenPortalBuffer.FirstOrDefault(p => p.ScreenId == _compositeScreenId);
-                //existingBufferState.IsPortal = !existingBufferState.IsPortal;
+                var existingBufferState = _screenPortalBuffer.FirstOrDefault(p => p.ScreenId == _compositeScreenId);
+                existingBufferState.IsPortal = !existingBufferState.IsPortal;
+
+                if (!existingBufferState.IsPortal)
+                {
+                    Transform screenObject = GetScreenObjectFromScreenId(_compositeScreenId);
+                    if (screenObject != null)
+                    {
+                        Transform portal = screenObject.Find("Portal");
+                        portal.gameObject.SetActive(false);
+                    }
+
+                    //ScreenActionModel screenAction = ScreenActions.FirstOrDefault(a => a.ScreenId == _compositeScreenId);
+                    //screenAction.NextAction = ScreenAction.ChangeVideoClip;
+                }
             }
             else
             {
