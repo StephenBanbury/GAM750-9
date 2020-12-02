@@ -11,8 +11,8 @@ namespace Assets.Scripts
 
         void Start()
         {
-            moveSpeed = 2f;
-            rotateSpeed = 40f;
+            moveSpeed = 6f;
+            rotateSpeed = 50f;
         }
         
         void FixedUpdate()
