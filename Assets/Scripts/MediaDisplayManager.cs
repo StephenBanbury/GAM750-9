@@ -659,20 +659,9 @@ namespace Assets.Scripts
 
             if (agoraUsers != null)
             {
-                //GameObject scene = GameObject.Find(sceneDetail.Name);
-                //Transform panels = scene.transform.Find($"Selection Panel {sceneDetail.Id}");
-
-                //if (panels != null)
-                //{
-                //Transform selectorPanel = panels.Find("StreamSelectorPanel");
-
-                //if (selectorPanel != null)
-                //{
-
-                float xLeft = 0;
-                float yPos = 0;
-                float offset = 31f;
-
+                float xLeft = 50;
+                float yPos = 50;
+                float offset = 32f;
 
                 Transform container = GameObject.Find("VideoStreamSelectButtons").transform;
 
@@ -687,52 +676,18 @@ namespace Assets.Scripts
                 Debug.Log($"Non-local agora users: {joinedUsers.Count}");
 
                 float xPos;
-                var yStart = 0.5f;
-                //var zPos = selectorPanel.position.z;
 
-                // Test
-                for (var x = 1; x <= 5; x++)
+                for (var x = 1; x <= joinedUsers.Count; x++)
                 {
-                    var buttonName = $"Button{x}";
                     xPos = xLeft + (x - 1) * offset;
-                    //var button = Instantiate(_button1, new Vector2(xPos, yPos), Quaternion.identity);
+                    var buttonName = $"Button{x}";
                     var button = Instantiate(_button1);
                     button.transform.parent = container;
                     button.transform.localPosition = new Vector2(xPos, yPos);
                     button.name = buttonName;
-
                     Text buttonText = button.GetComponentInChildren<Text>();
                     buttonText.text = x.ToString();
-
-                    //var buttonScript = button.gameObject.GetComponent<StreamSelectButtonPressed>();
-                    //buttonScript.StreamId = x;
-
-                    //button.transform.SetParent(container);
                 }
-
-
-                var i = 1;
-
-                //foreach (var joinedUser in joinedUsers)
-                //{
-                //    var buttonName = $"Button{i}";
-                //    var yPos = xLeft - (i - 1) * offset;
-                //    var button = Instantiate(_button1, new Vector2(xPos, yPos), Quaternion.identity);
-
-                //    button.name = buttonName;
-
-                //    Text buttonText = button.GetComponentInChildren<Canvas>().GetComponentInChildren<Text>();
-                //    buttonText.text = joinedUser.Uid.ToString();
-
-                //    var buttonScript = button.gameObject.GetComponent<StreamSelectButtonPressed>();
-                //    buttonScript.StreamId = joinedUser.Id;
-
-                //    button.transform.SetParent(container);
-
-                //    i++;
-                //}
-                //}
-                //}
             }
         }
 
