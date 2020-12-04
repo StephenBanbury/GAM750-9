@@ -49,6 +49,7 @@ namespace Assets.Scripts
         private int _currentVideoClip;
         private int _currentVideoStream;
         private int _compositeScreenId = 0;
+        private float _buttonOffset = 31f;
 
         public int SelectedVideo { set => _lastSelectedVideoId = value; }
         public int SelectedStream { set => _lastSelectedStreamId = value; }
@@ -288,7 +289,7 @@ namespace Assets.Scripts
                 $"Media state preparation: MediaTypeId = {_mediaStatePreparation.MediaTypeId}; MediaId = {_mediaStatePreparation.MediaId}");
         }
 
-        public void DisplaySelect(int id)
+        public void ScreenSelect(int id)
         {
             int compositeId = CompoundScreenId(id);
 
@@ -319,7 +320,7 @@ namespace Assets.Scripts
             ShowPortalButtonState();
         }
 
-        public bool PortalSelect()
+        public void PortalSelect()
         {
             if (_compositeScreenId > 0)
             {
@@ -327,8 +328,6 @@ namespace Assets.Scripts
                 ShowPortalButtonState();
                 Clear();
             }
-
-            return true;
         }
 
         // Get current portal state and show on button
@@ -432,7 +431,11 @@ namespace Assets.Scripts
             SpawnScene(Scene.Scene7, ScreenFormation.LargeStar);
             SpawnScene(Scene.Scene8, ScreenFormation.Triangle);
 
-            SpawnStreamSelectButtons();
+            SpawnSceneSelectButtons();
+            SpawnFormationSelectButtons();
+            SpawnVideoClipSelectButtons();
+            SpawnVideoStreamSelectButtons();
+            SpawnScreenSelectButtons();
 
             MyCurrentScene = Scene.Scene1;
             //OffsetPlayerPositionWithinScene();
@@ -591,10 +594,112 @@ namespace Assets.Scripts
             //_lobbyStatusInfoText.text += "\nFinished.";
             //_startButton.SetActive(true);
         }
-        
-        public void SpawnStreamSelectButtons()
+
+        private void SpawnSceneSelectButtons()
         {
-            Debug.Log("SpawnStreamSelectButtons");
+            Debug.Log("SpawnSceneSelectButtons");
+
+            float xLeft = 50;
+            float yPos = 50;
+
+            Transform container = GameObject.Find("SceneSelectButtons").transform;
+
+            foreach (Transform child in container)
+            {
+                if (child.gameObject.CompareTag("Button"))
+                    Destroy(child.gameObject);
+            }
+
+            for (int i = 1; i <= 9; i++)
+            {
+                var xPos = xLeft + (i - 1) * _buttonOffset;
+
+                var button = Instantiate(_button1);
+                button.name = $"Button{i}";
+
+                button.transform.SetParent(container);
+                button.transform.localPosition = new Vector2(xPos, yPos);
+
+                Text buttonText = button.GetComponentInChildren<Text>();
+                buttonText.text = i.ToString();
+
+                int param = i;
+                button.onClick.AddListener(delegate { SceneSelect(param); });
+                //button.onClick.AddListener(() => SceneSelect(i));
+            }
+        }
+
+        private void SpawnFormationSelectButtons()
+        {
+            Debug.Log("SpawnFormationSelectButtons");
+
+            float xLeft = 50;
+            float yPos = 50;
+
+            Transform container = GameObject.Find("FormationSelectButtons").transform;
+
+            foreach (Transform child in container)
+            {
+                if (child.gameObject.CompareTag("Button"))
+                    Destroy(child.gameObject);
+            }
+
+            for (int i = 1; i <= 8; i++)
+            {
+                var xPos = xLeft + (i - 1) * _buttonOffset;
+
+                var button = Instantiate(_button1);
+                button.name = $"Button{i}";
+
+                button.transform.SetParent(container);
+                button.transform.localPosition = new Vector2(xPos, yPos);
+
+                Text buttonText = button.GetComponentInChildren<Text>();
+                buttonText.text = i.ToString();
+
+                int param = i;
+                button.onClick.AddListener(delegate { FormationSelect(param); });
+                //button.onClick.AddListener(() => SceneSelect(i));
+            }
+        }
+
+        private void SpawnVideoClipSelectButtons()
+        {
+            Debug.Log("SpawnVideoClipSelectButtons");
+
+            float xLeft = 50;
+            float yPos = 50;
+
+            Transform container = GameObject.Find("VideoClipSelectButtons").transform;
+
+            foreach (Transform child in container)
+            {
+                if (child.gameObject.CompareTag("Button"))
+                    Destroy(child.gameObject);
+            }
+
+            for (int i = 1; i <= 10; i++)
+            {
+                var xPos = xLeft + (i - 1) * _buttonOffset;
+
+                var button = Instantiate(_button1);
+                button.name = $"Button{i}";
+
+                button.transform.SetParent(container);
+                button.transform.localPosition = new Vector2(xPos, yPos);
+
+                Text buttonText = button.GetComponentInChildren<Text>();
+                buttonText.text = i.ToString();
+
+                int param = i;
+                //button.onClick.AddListener(delegate { VideoSelect(i); });
+                button.onClick.AddListener(() => VideoSelect(param));
+            }
+        }
+
+        public void SpawnVideoStreamSelectButtons()
+        {
+            Debug.Log("SpawnVideoStreamSelectButtons");
 
             var agoraUsers = AgoraController.instance.AgoraUsers;
 
@@ -604,7 +709,6 @@ namespace Assets.Scripts
             {
                 float xLeft = 50;
                 float yPos = 50;
-                float offset = 32f;
 
                 Transform container = GameObject.Find("VideoStreamSelectButtons").transform;
 
@@ -618,22 +722,20 @@ namespace Assets.Scripts
 
                 Debug.Log($"Non-local agora users: {joinedUsers.Count}");
 
-                float xPos;
-
                 int i = 1;
 
                 foreach (var joinedUser in joinedUsers)
                 {
-                    xPos = xLeft + (i - 1) * offset;
+                    var xPos = xLeft + (i - 1) * _buttonOffset;
 
                     var button = Instantiate(_button1);
                     button.name = $"Button{i}";
 
-                    button.transform.parent = container;
+                    button.transform.SetParent(container);
                     button.transform.localPosition = new Vector2(xPos, yPos);
 
                     Text buttonText = button.GetComponentInChildren<Text>();
-                    buttonText.text = i.ToString();
+                    buttonText.text = joinedUser.Uid.ToString();
 
                     button.onClick.AddListener(delegate { StreamSelect(joinedUser.Id); });
                     //button.onClick.AddListener(() => StreamSelect(x));
@@ -642,6 +744,59 @@ namespace Assets.Scripts
                 }
             }
         }
+
+        private void SpawnScreenSelectButtons()
+        {
+            Debug.Log("SpawnScreenSelectButtons");
+
+            float xLeft = 50;
+            float yPos = 50;
+
+            Transform container = GameObject.Find("ScreenSelectButtons").transform;
+
+            foreach (Transform child in container)
+            {
+                if (child.gameObject.CompareTag("Button"))
+                    Destroy(child.gameObject);
+            }
+
+            for (int i = 1; i <= 8; i++)
+            {
+                var xPos = xLeft + (i - 1) * _buttonOffset;
+
+                var button = Instantiate(_button1);
+                button.name = $"Button{i}";
+
+                button.transform.SetParent(container);
+                button.transform.localPosition = new Vector2(xPos, yPos);
+
+                Text buttonText = button.GetComponentInChildren<Text>();
+                buttonText.text = i.ToString();
+
+                int param = i;
+                button.onClick.AddListener(delegate { ScreenSelect(param); });
+                //button.onClick.AddListener(() => VideoSelect(i));
+            }
+
+            for (int i = 1; i <= 8; i++)
+            {
+                var xPos = xLeft + (i - 1) * _buttonOffset;
+
+                var button = Instantiate(_button1);
+                button.name = $"Button{i + 8}";
+
+                button.transform.SetParent(container);
+                button.transform.localPosition = new Vector2(xPos, yPos - _buttonOffset);
+
+                Text buttonText = button.GetComponentInChildren<Text>();
+                buttonText.text = (i + 8).ToString();
+
+                int param = i + 8;
+                button.onClick.AddListener(delegate { ScreenSelect(param); });
+                //button.onClick.AddListener(() => VideoSelect(i));
+            }
+        }
+
 
         private void GetLocalVideosDetails()
         {

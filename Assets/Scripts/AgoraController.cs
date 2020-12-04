@@ -100,7 +100,7 @@ namespace Assets.Scripts
                         Debug.Log($" - Uid: {user.Uid})");
                     }
 
-                    MediaDisplayManager.instance.SpawnStreamSelectButtons();
+                    MediaDisplayManager.instance.SpawnVideoStreamSelectButtons();
                 }
             }
         }
@@ -118,7 +118,7 @@ namespace Assets.Scripts
                     UnityEngine.Object.Destroy(go);
                 }
 
-                MediaDisplayManager.instance.SpawnStreamSelectButtons();
+                MediaDisplayManager.instance.SpawnVideoStreamSelectButtons();
             }
         }
 
