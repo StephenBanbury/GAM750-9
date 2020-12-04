@@ -10,6 +10,7 @@ using Assets.Scripts.Services;
 using DG.Tweening;
 using Normal.Realtime;
 using Normal.Realtime.Serialization;
+using UnityEngine.Events;
 using UnityEngine.Networking;
 using UnityEngine.UI;
 using UnityEngine.Video;
@@ -282,6 +283,9 @@ namespace Assets.Scripts
                 MediaTypeId = (int)MediaType.VideoStream,
                 MediaId = id
             };
+
+            Debug.Log(
+                $"Media state preparation: MediaTypeId = {_mediaStatePreparation.MediaTypeId}; MediaId = {_mediaStatePreparation.MediaId}");
         }
 
         public void DisplaySelect(int id)
@@ -320,8 +324,8 @@ namespace Assets.Scripts
             if (_compositeScreenId > 0)
             {
                 StoreRealtimeScreenPortalState();
-                //StoreBufferScreenPortalState();
                 ShowPortalButtonState();
+                Clear();
             }
 
             return true;
@@ -344,7 +348,7 @@ namespace Assets.Scripts
             StoreRealtimeScreenMediaState();
             StoreBufferScreenMediaState();
 
-            _mediaStatePreparationBuffer.Clear();
+            Clear();
         }
 
 
@@ -428,7 +432,7 @@ namespace Assets.Scripts
             SpawnScene(Scene.Scene7, ScreenFormation.LargeStar);
             SpawnScene(Scene.Scene8, ScreenFormation.Triangle);
 
-            CreateStreamSelectButtons();
+            SpawnStreamSelectButtons();
 
             MyCurrentScene = Scene.Scene1;
             //OffsetPlayerPositionWithinScene();
@@ -587,71 +591,10 @@ namespace Assets.Scripts
             //_lobbyStatusInfoText.text += "\nFinished.";
             //_startButton.SetActive(true);
         }
-
-
-        //public void CreateStreamSelectButtons()
-        //{
-        //    if (Scenes == null)
-        //        Scenes = new List<SceneDetail>();
-
-        //    var agoraUsers = AgoraController.instance.AgoraUsers;
-
-        //    if (agoraUsers != null)
-        //    {
-        //        foreach (var sceneDetail in Scenes)
-        //        {
-        //            GameObject scene = GameObject.Find(sceneDetail.Name);
-        //            Transform panels = scene.transform.Find($"Selection Panel {sceneDetail.Id}");
-
-        //            if (panels != null)
-        //            {
-        //                Transform selectorPanel = panels.Find("StreamSelectorPanel");
-
-        //                if (selectorPanel != null)
-        //                {
-        //                    foreach (Transform child in selectorPanel)
-        //                    {
-        //                        Destroy(child.gameObject);
-        //                    }
-
-        //                    var joinedUsers = agoraUsers.Where(u => !(u.IsLocal || u.LeftRoom)).ToList();
-
-        //                    Debug.Log($"Non-local agora users: {joinedUsers.Count}");
-
-        //                    var xPos = selectorPanel.position.x;
-        //                    var yStart = 0.5f;
-        //                    var zPos = selectorPanel.position.z;
-
-        //                    var i = 1;
-
-        //                    foreach (var joinedUser in joinedUsers)
-        //                    {
-        //                        var buttonName = $"Button{sceneDetail.Id}{i}";
-        //                        var yPos = yStart - (i - 1) * 0.117f;
-        //                        var button = Instantiate(_streamButton, new Vector3(xPos, yPos, zPos),
-        //                            Quaternion.identity);
-
-        //                        button.name = buttonName;
-
-        //                        Text buttonText = button.GetComponentInChildren<Canvas>().GetComponentInChildren<Text>();
-        //                        buttonText.text = joinedUser.Uid.ToString();
-
-        //                        var buttonScript = button.gameObject.GetComponent<StreamSelectButtonPressed>();
-        //                        buttonScript.StreamId = joinedUser.Id;
-
-        //                        button.transform.SetParent(selectorPanel);
-
-        //                        i++;
-        //                    }
-        //                }
-        //            }
-        //        }
-        //    }
-        //}
-
-        public void CreateStreamSelectButtons()
+        
+        public void SpawnStreamSelectButtons()
         {
-            Debug.Log("CreateStreamSelectButtons");
+            Debug.Log("SpawnStreamSelectButtons");
 
             var agoraUsers = AgoraController.instance.AgoraUsers;
 
@@ -677,16 +620,25 @@ namespace Assets.Scripts
 
                 float xPos;
 
-                for (var x = 1; x <= joinedUsers.Count; x++)
+                int i = 1;
+
+                foreach (var joinedUser in joinedUsers)
                 {
-                    xPos = xLeft + (x - 1) * offset;
-                    var buttonName = $"Button{x}";
+                    xPos = xLeft + (i - 1) * offset;
+
                     var button = Instantiate(_button1);
+                    button.name = $"Button{i}";
+
                     button.transform.parent = container;
                     button.transform.localPosition = new Vector2(xPos, yPos);
-                    button.name = buttonName;
+
                     Text buttonText = button.GetComponentInChildren<Text>();
-                    buttonText.text = x.ToString();
+                    buttonText.text = i.ToString();
+
+                    button.onClick.AddListener(delegate { StreamSelect(joinedUser.Id); });
+                    //button.onClick.AddListener(() => StreamSelect(x));
+
+                    i++;
                 }
             }
         }
@@ -772,6 +724,7 @@ namespace Assets.Scripts
                     model.mediaScreenDisplayStates.FirstOrDefault(s => s.screenDisplayId == buffer.ScreenDisplayId);
 
                 Debug.Log($"StoreRealtimeScreenMediaState. Exists: {existing != null}");
+                Debug.Log($"buffer.ScreenDisplayId: {buffer.ScreenDisplayId}; buffer.MediaTypeId: {buffer.MediaTypeId}; buffer.MediaId: {buffer.MediaId}");
 
                 if (existing != null)
                 {

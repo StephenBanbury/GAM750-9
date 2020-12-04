@@ -30,7 +30,7 @@ namespace Assets.Scripts
 
         [SerializeField] private string _appID = "54f15673a8fd43318b10d4e42f8dd781";
         [SerializeField] private string _roomName;
-        [SerializeField] private Text _testText;
+        [SerializeField] private Text _statusText;
 
         public List<AgoraUser> AgoraUsers
         {
@@ -57,6 +57,8 @@ namespace Assets.Scripts
 
             // keep this alive across scenes
             DontDestroyOnLoad(this.gameObject);
+
+            _statusText.text = "";
 
             JoinRoom();
         }
@@ -98,7 +100,7 @@ namespace Assets.Scripts
                         Debug.Log($" - Uid: {user.Uid})");
                     }
 
-                    MediaDisplayManager.instance.CreateStreamSelectButtons();
+                    MediaDisplayManager.instance.SpawnStreamSelectButtons();
                 }
             }
         }
@@ -116,7 +118,7 @@ namespace Assets.Scripts
                     UnityEngine.Object.Destroy(go);
                 }
 
-                MediaDisplayManager.instance.CreateStreamSelectButtons();
+                MediaDisplayManager.instance.SpawnStreamSelectButtons();
             }
         }
 
@@ -243,8 +245,7 @@ namespace Assets.Scripts
 
             if (joined)
             {
-                //SceneManager.sceneLoaded += OnLevelFinishedLoading; // configure GameObject after scene is loaded
-                //_testText.text = $"Joined {_roomName}";
+                _statusText.text = "Live video: connected";
             }
         }
 

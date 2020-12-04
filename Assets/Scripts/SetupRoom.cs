@@ -12,11 +12,11 @@ namespace Assets.Scripts
         private Realtime _realtime;
         private RealtimeTransform _realtimeTransform;
 
-        [SerializeField] private Text _status;
+        [SerializeField] private Text _statusText;
 
         private void Awake()
         {
-            _status.text = "";
+            _statusText.text = "";
 
             // Get the Realtime component on this game object
             _realtime = GetComponent<Realtime>();
@@ -28,7 +28,7 @@ namespace Assets.Scripts
 
         private void DidConnectToRoom(Realtime realtime)
         {
-            _status.text = "Normcore: connected";
+            _statusText.text = "Multiplayer: connected";
         }
     }
 }
