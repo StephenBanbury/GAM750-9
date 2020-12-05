@@ -34,6 +34,7 @@ namespace Assets.Scripts
         [SerializeField] private Text _debugText;
         //[SerializeField] private Text _hudText;
         [SerializeField] private Text _bufferText;
+        [SerializeField] private Text _videoClipValue;
 
         private int _sceneIndex;
         private int _lastSelectedVideoId;
@@ -264,8 +265,32 @@ namespace Assets.Scripts
 
         public void VideoSelect(int id)
         {
-            _currentVideoClip = id;
+            int nVideos = Videos.Count;
+
+            int temp = _currentVideoClip;
+
+            if (id % 10 == 0)
+            {
+                _currentVideoClip = id;
+            }
+            else if(_currentVideoClip % 10 == 0)
+            {
+                _currentVideoClip += id;
+            }
+            else if (_currentVideoClip == 0)
+            {
+                _currentVideoClip = id;
+            }
+            else
+            {
+                _currentVideoClip = _currentVideoClip - _currentVideoClip % 10 + id;
+            }
+
+            if (_currentVideoClip > nVideos) 
+                _currentVideoClip = temp;
+
             _currentVideoStream = 0;
+            _videoClipValue.text = _currentVideoClip.ToString();
 
             _mediaStatePreparation = new MediaScreenDisplayBufferState
             {
@@ -667,6 +692,54 @@ namespace Assets.Scripts
             }
         }
 
+        //private void SpawnVideoClipSelectButtons()
+        //{
+        //    Debug.Log("SpawnVideoClipSelectButtons");
+
+        //    Transform container = RemoveGameObjectsFromContainer("VideoClipSelectButtons", "Button");
+
+        //    var nVideos = Videos.Count;
+
+        //    // TODO: remove
+        //    //nVideos = 20;
+
+        //    if (nVideos > 0)
+        //    {
+        //        float xLeft = 50;
+        //        float yPos = 50;
+        //        float yPos2 = yPos - _buttonOffset;
+
+        //        for (int i = 1; i <= nVideos; i++)
+        //        {
+        //            int x;
+        //            if (i <= 10)
+        //            {
+        //                x = i;
+        //            }
+        //            else
+        //            {
+        //                x = i - 10;
+        //                yPos = yPos2;
+        //            }
+
+        //            var xPos = xLeft + (x - 1) * _buttonOffset;
+
+        //            var button = Instantiate(_button1);
+        //            button.name = $"Button{i}";
+
+        //            button.transform.SetParent(container);
+        //            button.transform.localPosition = new Vector2(xPos, yPos);
+
+        //            Text buttonText = button.GetComponentInChildren<Text>();
+        //            buttonText.text = i.ToString();
+
+        //            int param = i;
+        //            //button.onClick.AddListener(delegate { VideoSelect(i); });
+        //            button.onClick.AddListener(() => VideoSelect(param));
+        //        }
+        //    }
+        //}
+
         private void SpawnVideoClipSelectButtons()
         {
             Debug.Log("SpawnVideoClipSelectButtons");
@@ -675,26 +748,49 @@ namespace Assets.Scripts
 
             var nVideos = Videos.Count;
 
+            Debug.Log($"nVideos: {nVideos}");
+
+            // TODO: remove
+            //nVideos = 20;
+
             if (nVideos > 0)
             {
                 float xLeft = 50;
                 float yPos = 50;
-                float yPos2 = yPos - _buttonOffset;
+                int nTens = nVideos / 10;
 
-                for (int i = 1; i <= nVideos; i++)
+                Debug.Log($"nTens: {nTens}");
+
+                for (int i = 1; i <= nVideos / 10; i++)
                 {
                     int x;
-                    if (i <= 10)
-                    {
-                        x = i;
-                    }
-                    else
-                    {
-                        x = i - 10;
-                        yPos = yPos2;
-                    }
+                    int v;
 
-                    var xPos = xLeft + (x - 1) * _buttonOffset;
+                    x = i * 10;
+                    //v = i;
+
+                    var xPos = xLeft + (i - 1) * _buttonOffset;
+
+                    var button = Instantiate(_button1);
+                    button.name = $"Button{x}";
+
+                    button.transform.SetParent(container);
+                    button.transform.localPosition = new Vector2(xPos, yPos);
+
+                    Text buttonText = button.GetComponentInChildren<Text>();
+                    buttonText.text = x.ToString();
+
+                    int param = x;
+                    //button.onClick.AddListener(delegate { VideoSelect(i); });
+                    button.onClick.AddListener(() => VideoSelect(param));
+                }
+
+
+                yPos = yPos - _buttonOffset;
+
+                for (int i = 1; i <= 9; i++)
+                {
+                    var xPos = xLeft + (i - 1) * _buttonOffset;
 
                     var button = Instantiate(_button1);
                     button.name = $"Button{i}";
@@ -1043,8 +1139,6 @@ namespace Assets.Scripts
 
             if (videoId > 0 && screenId > 0) // && _displayVideo[localDisplayId].Id != videoId)
             {
-                Debug.Log($"Assign videoId: {videoId}");
-
                 Transform screenObject = GetScreenObjectFromScreenId(screenId);
 
                 var thisVideoClip = Videos.First(v => v.Id == videoId);
