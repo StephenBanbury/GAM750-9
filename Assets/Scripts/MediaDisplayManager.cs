@@ -350,8 +350,6 @@ namespace Assets.Scripts
             Clear();
         }
 
-
-
         public void Clear()
         {
             _mediaStatePreparationBuffer.Clear();
@@ -366,8 +364,13 @@ namespace Assets.Scripts
                 var sceneId = SceneFromScreenId(state.ScreenDisplayId);
                 int displaySceneId = state.ScreenDisplayId - sceneId * 100;
                 _bufferText.text +=
-                    $"\n{(MediaType)state.MediaTypeId} {state.MediaId} --> Scene {sceneId} / Screen {displaySceneId}";
+                    $"{(MediaType)state.MediaTypeId} {state.MediaId} --> Scene {sceneId} / Screen {displaySceneId}\n";
             }
+        }
+
+        public void DoExitGame()
+        {
+            Application.Quit();
         }
 
         private int CompoundFormationId(int formationId)
@@ -595,20 +598,27 @@ namespace Assets.Scripts
             //_startButton.SetActive(true);
         }
 
+        private Transform RemoveGameObjectsFromContainer(string containerName, string objectTag)
+        {
+            Transform container = GameObject.Find(containerName).transform;
+
+            foreach (Transform child in container)
+            {
+                if (child.gameObject.CompareTag(objectTag))
+                    Destroy(child.gameObject);
+            }
+
+            return container;
+        }
+
         private void SpawnSceneSelectButtons()
         {
             Debug.Log("SpawnSceneSelectButtons");
 
+            Transform container = RemoveGameObjectsFromContainer("SceneSelectButtons", "Button");
+
             float xLeft = 50;
             float yPos = 50;
-
-            Transform container = GameObject.Find("SceneSelectButtons").transform;
-
-            foreach (Transform child in container)
-            {
-                if (child.gameObject.CompareTag("Button"))
-                    Destroy(child.gameObject);
-            }
 
             for (int i = 1; i <= 9; i++)
             {
@@ -633,16 +643,10 @@ namespace Assets.Scripts
         {
             Debug.Log("SpawnFormationSelectButtons");
 
+            Transform container = RemoveGameObjectsFromContainer("FormationSelectButtons", "Button");
+
             float xLeft = 50;
             float yPos = 50;
-
-            Transform container = GameObject.Find("FormationSelectButtons").transform;
-
-            foreach (Transform child in container)
-            {
-                if (child.gameObject.CompareTag("Button"))
-                    Destroy(child.gameObject);
-            }
 
             for (int i = 1; i <= 8; i++)
             {
@@ -667,33 +671,44 @@ namespace Assets.Scripts
         {
             Debug.Log("SpawnVideoClipSelectButtons");
 
-            float xLeft = 50;
-            float yPos = 50;
+            Transform container = RemoveGameObjectsFromContainer("VideoClipSelectButtons", "Button");
 
-            Transform container = GameObject.Find("VideoClipSelectButtons").transform;
+            var nVideos = Videos.Count;
 
-            foreach (Transform child in container)
+            if (nVideos > 0)
             {
-                if (child.gameObject.CompareTag("Button"))
-                    Destroy(child.gameObject);
-            }
+                float xLeft = 50;
+                float yPos = 50;
+                float yPos2 = yPos - _buttonOffset;
 
-            for (int i = 1; i <= 10; i++)
-            {
-                var xPos = xLeft + (i - 1) * _buttonOffset;
+                for (int i = 1; i <= nVideos; i++)
+                {
+                    int x;
+                    if (i <= 10)
+                    {
+                        x = i;
+                    }
+                    else
+                    {
+                        x = i - 10;
+                        yPos = yPos2;
+                    }
 
-                var button = Instantiate(_button1);
-                button.name = $"Button{i}";
+                    var xPos = xLeft + (x - 1) * _buttonOffset;
 
-                button.transform.SetParent(container);
-                button.transform.localPosition = new Vector2(xPos, yPos);
+                    var button = Instantiate(_button1);
+                    button.name = $"Button{i}";
 
-                Text buttonText = button.GetComponentInChildren<Text>();
-                buttonText.text = i.ToString();
+                    button.transform.SetParent(container);
+                    button.transform.localPosition = new Vector2(xPos, yPos);
 
-                int param = i;
-                //button.onClick.AddListener(delegate { VideoSelect(i); });
-                button.onClick.AddListener(() => VideoSelect(param));
+                    Text buttonText = button.GetComponentInChildren<Text>();
+                    buttonText.text = i.ToString();
+
+                    int param = i;
+                    //button.onClick.AddListener(delegate { VideoSelect(i); });
+                    button.onClick.AddListener(() => VideoSelect(param));
+                }
             }
         }
 
@@ -701,8 +716,9 @@ namespace Assets.Scripts
         {
             Debug.Log("SpawnVideoStreamSelectButtons");
 
-            var agoraUsers = AgoraController.instance.AgoraUsers;
+            Transform container = RemoveGameObjectsFromContainer("VideoStreamSelectButtons", "Button");
 
+            var agoraUsers = AgoraController.instance.AgoraUsers;
             Debug.Log($"agoraUsers: {agoraUsers.Count}");
 
             if (agoraUsers != null)
@@ -710,16 +726,7 @@ namespace Assets.Scripts
                 float xLeft = 50;
                 float yPos = 50;
 
-                Transform container = GameObject.Find("VideoStreamSelectButtons").transform;
-
-                foreach (Transform child in container)
-                {
-                    if (child.gameObject.CompareTag("Button"))
-                        Destroy(child.gameObject);
-                }
-
                 var joinedUsers = agoraUsers.Where(u => !(u.IsLocal || u.LeftRoom)).ToList();
-
                 Debug.Log($"Non-local agora users: {joinedUsers.Count}");
 
                 int i = 1;
@@ -749,16 +756,10 @@ namespace Assets.Scripts
         {
             Debug.Log("SpawnScreenSelectButtons");
 
+            Transform container = RemoveGameObjectsFromContainer("ScreenSelectButtons", "Button");
+
             float xLeft = 50;
             float yPos = 50;
-
-            Transform container = GameObject.Find("ScreenSelectButtons").transform;
-
-            foreach (Transform child in container)
-            {
-                if (child.gameObject.CompareTag("Button"))
-                    Destroy(child.gameObject);
-            }
 
             for (int i = 1; i <= 8; i++)
             {
