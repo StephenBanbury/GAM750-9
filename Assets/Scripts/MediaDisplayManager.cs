@@ -35,6 +35,8 @@ namespace Assets.Scripts
         //[SerializeField] private Text _hudText;
         [SerializeField] private Text _bufferText;
         [SerializeField] private Text _videoClipValue;
+        [SerializeField] private Material _skybox1;
+        [SerializeField] private Material _skybox2;
 
         private int _sceneIndex;
         private int _lastSelectedVideoId;
@@ -81,6 +83,7 @@ namespace Assets.Scripts
         void Start()
         {
             _currentSceneId = 1;
+            SetSkybox(false);
             StartCoroutine(AwaitVideosFromApiBeforeStart());
         }
 
@@ -535,35 +538,54 @@ namespace Assets.Scripts
             StartCoroutine(DoTeleportation(randomSceneId));
         }
 
-        public IEnumerator DoTeleportation(int sceneId)
+        public IEnumerator DoTeleportation(int sceneId, bool scatter = false)
         {
-            string spawnPointName = $"Spawn Point {sceneId}";
-            Transform spawnPoint = GameObject.Find(spawnPointName).transform;
-            Transform player = GameObject.Find("Player").transform;
-            var playerController = player.GetComponent<OVRPlayerController>();
-            var sceneSampleController = player.GetComponent<OVRSceneSampleController>();
+            Debug.Log("DoTeleportation");
 
-            //Debug.Log($"Teleporting to {spawnPointName}");
-            //Debug.Log($"SpawnPoint position: {spawnPoint.position}");
+            if (sceneId == 9)
+            {
+                string spawnPointName = $"Spawn Point {sceneId}";
+                Transform spawnPoint = GameObject.Find(spawnPointName).transform;
+                Transform camera = GameObject.Find("Main Camera").transform;
 
-            playerController.enabled = false;
-            sceneSampleController.enabled = false;
+                //var playerController = player.GetComponent<OVRPlayerController>();
+                //var sceneSampleController = player.GetComponent<OVRSceneSampleController>();
 
-            PlayerAudioManager.instance.PlayAudioClip("Teleport 3_1");
+                //Debug.Log($"Teleporting to {spawnPointName}");
+                //Debug.Log($"SpawnPoint position: {spawnPoint.position}");
 
-            yield return new WaitForSeconds(2f);
+                //playerController.enabled = false;
+                //sceneSampleController.enabled = false;
 
-            PlayerAudioManager.instance.PlayAudioClip("Teleport 3_2");
+                //PlayerAudioManager.instance.PlayAudioClip("Teleport 3_1");
 
-            player.position = spawnPoint.position;
+                yield return new WaitForSeconds(2f);
 
-            yield return new WaitForSeconds(0.5f);
+                //PlayerAudioManager.instance.PlayAudioClip("Teleport 3_2");
 
+                //if (scatter)
+                //{
+                //    float x = newPosition.x + Random.Range(-1f, 1f);
+                //    float y = newPosition.y + Random.Range(-1f, 1f);
+                //    float z = newPosition.z;
+                //    newPosition = new Vector3(x, y, z);
+                //}
 
-            playerController.enabled = true;
-            sceneSampleController.enabled = true;
+                //camera.position = newPosition;
 
-            MediaDisplayManager.instance.MyCurrentScene = (Scene)sceneId;
+                SetSkybox(true);
+
+                yield return new WaitForSeconds(0.5f);
+
+                Vector3 newPosition = spawnPoint.position;
+
+                camera.position = newPosition;
+
+                //playerController.enabled = true;
+                //sceneSampleController.enabled = true;
+
+                //MyCurrentScene = (Scene)sceneId;
+            }
         }
 
         private IEnumerator DownloadVideoFiles(List<MediaDetail> mediaDetails)
@@ -1524,6 +1546,32 @@ namespace Assets.Scripts
                         .SetEase(Ease.Linear);
                 }
 
+            }
+        }
+
+        public void GrandFinale()
+        {
+            var gameManager = GameObject.Find("GameManager");
+            var teleportToScene = gameManager.GetComponent<TeleportToSceneSync>();
+            teleportToScene.SetNewScene(9);
+        }
+
+        public void SetSkybox(bool useFinale)
+        {
+            if (!useFinale)
+            {
+                RenderSettings.skybox = _skybox1;
+            }
+            else
+            {
+                RenderSettings.skybox = _skybox2;
+
+                GameObject vpContainer = GameObject.Find("SkyboxVideoPlayer");
+                if (vpContainer != null)
+                {
+                    VideoPlayer vp = vpContainer.GetComponent<VideoPlayer>();
+                    vp.Play();
+                }
             }
         }
     }
