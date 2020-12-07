@@ -17,28 +17,28 @@ namespace Assets.Scripts.Services
 
             switch (_scene)
             {
-                case Scene.Scene1:
+                case Scene.Scene8:
+                    position = new Vector3(0f, 0f, -15f);
+                    break;
+                case Scene.Scene7:
                     position = new Vector3(15f, 0f, -15f);
                     break;
-                case Scene.Scene2:
+                case Scene.Scene6:
                     position = new Vector3(15f, 0f, 0f);
                     break;
-                case Scene.Scene3:
+                case Scene.Scene5:
                     position = new Vector3(15f, 0f, 15f);
                     break;
                 case Scene.Scene4:
                     position = new Vector3(0f, 0f, 15f);
                     break;
-                case Scene.Scene5:
-                    position = new Vector3(-15f, 0f, 0f);
-                    break;
-                case Scene.Scene6:
+                case Scene.Scene3:
                     position = new Vector3(-15f, 0f, 15f);
                     break;
-                case Scene.Scene7:
-                    position = new Vector3(0f, 0f, -15f);
+                case Scene.Scene2: 
+                    position = new Vector3(-15f, 0f, 0f);
                     break;
-                case Scene.Scene8:
+                case Scene.Scene1: 
                     position = new Vector3(-15f, 0f, -15f);
                     break;
             }
@@ -46,21 +46,5 @@ namespace Assets.Scripts.Services
             return position;
         }
 
-        //public Vector3 GetSelectionPanelPosition()
-        //{
-        //    Vector3 position = new Vector3(-1.38f, -1f, -2.76f);
-        //    return position;
-        //}
-
-        //public Vector3 GetSceneLightsPosition()
-        //{
-        //    Vector3 position = new Vector3(0f, 0f, 0f);
-        //    return position;
-        //}
-        //public Vector3 GetSceneAudioPosition()
-        //{
-        //    Vector3 position = new Vector3(-1.01f, 0.24f, -3.28f);
-        //    return position;
-        //}
     }
 }

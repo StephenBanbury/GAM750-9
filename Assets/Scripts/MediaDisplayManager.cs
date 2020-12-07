@@ -34,7 +34,11 @@ namespace Assets.Scripts
         [SerializeField] private Text _debugText;
         //[SerializeField] private Text _hudText;
         [SerializeField] private Text _bufferText;
+        [SerializeField] private Text _sceneValue;
+        [SerializeField] private Text _formationValue;
+        [SerializeField] private Text _videoStreamValue;
         [SerializeField] private Text _videoClipValue;
+        [SerializeField] private Text _screenValue;
         [SerializeField] private Material _skybox1;
         [SerializeField] private Material _skybox2;
 
@@ -255,12 +259,15 @@ namespace Assets.Scripts
 
         public void SceneSelect(int id)
         {
+            _sceneValue.text = id.ToString();
             _currentSceneId = id;
         }
 
         public void FormationSelect(int id)
         {
             Debug.Log($"FormationId: {id}");
+
+            _formationValue.text = id.ToString();
 
             var formationSyncScript = gameObject.GetComponent<FormationSelectSync>();
             int compoundId = CompoundFormationId(id);
@@ -269,6 +276,7 @@ namespace Assets.Scripts
 
         public void VideoSelect(int id)
         {
+
             int nVideos = Videos.Count;
 
             int temp = _currentVideoClip;
@@ -305,6 +313,8 @@ namespace Assets.Scripts
 
         public void StreamSelect(int id)
         {
+            _videoStreamValue.text = id.ToString();
+
             _currentVideoClip = 0;
             _currentVideoStream = id;
 
@@ -313,13 +323,15 @@ namespace Assets.Scripts
                 MediaTypeId = (int)MediaType.VideoStream,
                 MediaId = id
             };
-
+            
             Debug.Log(
                 $"Media state preparation: MediaTypeId = {_mediaStatePreparation.MediaTypeId}; MediaId = {_mediaStatePreparation.MediaId}");
         }
 
         public void ScreenSelect(int id)
         {
+            _screenValue.text = id.ToString();
+
             int compositeId = CompoundScreenId(id);
 
             if (_mediaStatePreparation != null)
@@ -455,13 +467,13 @@ namespace Assets.Scripts
             CanTransformScene = new List<Scene> { Scene.Scene1 };
 
             SpawnScene(Scene.Scene1, ScreenFormation.LargeSquare);
-            SpawnScene(Scene.Scene2, ScreenFormation.ShortRectangle);
+            SpawnScene(Scene.Scene2, ScreenFormation.SmallSquare);
             SpawnScene(Scene.Scene3, ScreenFormation.Circle);
             SpawnScene(Scene.Scene4, ScreenFormation.Cross);
-            SpawnScene(Scene.Scene5, ScreenFormation.SmallSquare);
-            SpawnScene(Scene.Scene6, ScreenFormation.LongRectangle);
-            SpawnScene(Scene.Scene7, ScreenFormation.LargeStar);
-            SpawnScene(Scene.Scene8, ScreenFormation.Triangle);
+            SpawnScene(Scene.Scene5, ScreenFormation.ShortRectangle);
+            SpawnScene(Scene.Scene6, ScreenFormation.LargeStar);
+            SpawnScene(Scene.Scene7, ScreenFormation.Triangle);
+            SpawnScene(Scene.Scene8, ScreenFormation.LongRectangle);
 
             SpawnSceneSelectButtons();
             SpawnFormationSelectButtons();
@@ -655,7 +667,7 @@ namespace Assets.Scripts
             float xLeft = 50;
             float yPos = 50;
 
-            for (int i = 1; i <= 9; i++)
+            for (int i = 1; i <= 8; i++)
             {
                 var xPos = xLeft + (i - 1) * _buttonOffset;
 
@@ -667,6 +679,7 @@ namespace Assets.Scripts
 
                 Text buttonText = button.GetComponentInChildren<Text>();
                 buttonText.text = i.ToString();
+                buttonText.fontStyle = FontStyle.Bold;
 
                 int param = i;
                 button.onClick.AddListener(delegate { SceneSelect(param); });
@@ -695,6 +708,7 @@ namespace Assets.Scripts
 
                 Text buttonText = button.GetComponentInChildren<Text>();
                 buttonText.text = i.ToString();
+                buttonText.fontStyle = FontStyle.Bold;
 
                 int param = i;
                 button.onClick.AddListener(delegate { FormationSelect(param); });
@@ -702,53 +716,6 @@ namespace Assets.Scripts
             }
         }
 
-        //private void SpawnVideoClipSelectButtons()
-        //{
-        //    Debug.Log("SpawnVideoClipSelectButtons");
-
-        //    Transform container = RemoveGameObjectsFromContainer("VideoClipSelectButtons", "Button");
-
-        //    var nVideos = Videos.Count;
-
-        //    // TODO: remove
-        //    //nVideos = 20;
-
-        //    if (nVideos > 0)
-        //    {
-        //        float xLeft = 50;
-        //        float yPos = 50;
-        //        float yPos2 = yPos - _buttonOffset;
-
-        //        for (int i = 1; i <= nVideos; i++)
-        //        {
-        //            int x;
-        //            if (i <= 10)
-        //            {
-        //                x = i;
-        //            }
-        //            else
-        //            {
-        //                x = i - 10;
-        //                yPos = yPos2;
-        //            }
-
-        //            var xPos = xLeft + (x - 1) * _buttonOffset;
-
-        //            var button = Instantiate(_button1);
-        //            button.name = $"Button{i}";
-
-        //            button.transform.SetParent(container);
-        //            button.transform.localPosition = new Vector2(xPos, yPos);
-
-        //            Text buttonText = button.GetComponentInChildren<Text>();
-        //            buttonText.text = i.ToString();
-
-        //            int param = i;
-        //            //button.onClick.AddListener(delegate { VideoSelect(i); });
-        //            button.onClick.AddListener(() => VideoSelect(param));
-        //        }
-        //    }
-        //}
 
         private void SpawnVideoClipSelectButtons()
         {
@@ -789,6 +756,7 @@ namespace Assets.Scripts
 
                     Text buttonText = button.GetComponentInChildren<Text>();
                     buttonText.text = x.ToString();
+                    buttonText.fontStyle = FontStyle.Bold;
 
                     int param = x;
                     //button.onClick.AddListener(delegate { VideoSelect(i); });
@@ -810,6 +778,7 @@ namespace Assets.Scripts
 
                     Text buttonText = button.GetComponentInChildren<Text>();
                     buttonText.text = i.ToString();
+                    buttonText.fontStyle = FontStyle.Bold;
 
                     int param = i;
                     //button.onClick.AddListener(delegate { VideoSelect(i); });
@@ -849,6 +818,7 @@ namespace Assets.Scripts
 
                     Text buttonText = button.GetComponentInChildren<Text>();
                     buttonText.text = joinedUser.Uid.ToString();
+                    buttonText.fontStyle = FontStyle.Bold;
 
                     button.onClick.AddListener(delegate { StreamSelect(joinedUser.Id); });
                     //button.onClick.AddListener(() => StreamSelect(x));
@@ -879,6 +849,7 @@ namespace Assets.Scripts
 
                 Text buttonText = button.GetComponentInChildren<Text>();
                 buttonText.text = i.ToString();
+                buttonText.fontStyle = FontStyle.Bold;
 
                 int param = i;
                 button.onClick.AddListener(delegate { ScreenSelect(param); });
@@ -897,6 +868,7 @@ namespace Assets.Scripts
 
                 Text buttonText = button.GetComponentInChildren<Text>();
                 buttonText.text = (i + 8).ToString();
+                buttonText.fontStyle = FontStyle.Bold;
 
                 int param = i + 8;
                 button.onClick.AddListener(delegate { ScreenSelect(param); });
@@ -1422,8 +1394,8 @@ namespace Assets.Scripts
 
             foreach (var screenPosition in thisFormation)
             {
-                if (!screenPosition.Hide)
-                {
+                //if (!screenPosition.Hide)
+                //{
                     var vector3 = screenPosition.Vector3;
                     vector3.y += _floorAdjust;
 
@@ -1471,7 +1443,7 @@ namespace Assets.Scripts
                     });
 
                     //SetNextScreenAction(screenId);
-                }
+                //}
             }
 
             _sceneIndex++;
