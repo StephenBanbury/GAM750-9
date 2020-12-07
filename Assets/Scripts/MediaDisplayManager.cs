@@ -484,33 +484,33 @@ namespace Assets.Scripts
             MyCurrentScene = Scene.Scene1;
         }
 
-        public void SetNextScreenAction(int screenId)
-        {
-            ScreenAction newAction;
-            ScreenActionModel screenAction = ScreenActions.FirstOrDefault(a => a.ScreenId == screenId);
-            ScreenAction lastAction = screenAction.NextAction;
-            Scene scene = GetSceneFromScreenId(screenId);
+        //public void SetNextScreenAction(int screenId)
+        //{
+        //    ScreenAction newAction;
+        //    ScreenActionModel screenAction = ScreenActions.FirstOrDefault(a => a.ScreenId == screenId);
+        //    ScreenAction lastAction = screenAction.NextAction;
+        //    Scene scene = GetSceneFromScreenId(screenId);
 
-            if (lastAction == ScreenAction.CreatePortal)
-            {
-                newAction = ScreenAction.DoTeleport;
-            }
-            else
-            {
-                bool canDoFormation = CanTransformScene.Contains(scene);
-                bool hasVideoStreams = AgoraController.instance.AgoraUsers.Count > 0;
-                int numberOfActions = Enum.GetValues(typeof(ScreenAction)).Cast<int>().Max();
-                do
-                {
-                    newAction = (ScreenAction)Math.Ceiling(Random.value * numberOfActions);
-                } while (newAction == lastAction
-                         || newAction == ScreenAction.ChangeFormation && !canDoFormation
-                         || newAction == ScreenAction.DoTeleport && lastAction != ScreenAction.CreatePortal
-                         || newAction == ScreenAction.ChangeVideoStream && !hasVideoStreams);
-            }
+        //    if (lastAction == ScreenAction.CreatePortal)
+        //    {
+        //        newAction = ScreenAction.DoTeleport;
+        //    }
+        //    else
+        //    {
+        //        bool canDoFormation = CanTransformScene.Contains(scene);
+        //        bool hasVideoStreams = AgoraController.instance.AgoraUsers.Count > 0;
+        //        int numberOfActions = Enum.GetValues(typeof(ScreenAction)).Cast<int>().Max();
+        //        do
+        //        {
+        //            newAction = (ScreenAction)Math.Ceiling(Random.value * numberOfActions);
+        //        } while (newAction == lastAction
+        //                 || newAction == ScreenAction.ChangeFormation && !canDoFormation
+        //                 || newAction == ScreenAction.DoTeleport && lastAction != ScreenAction.CreatePortal
+        //                 || newAction == ScreenAction.ChangeVideoStream && !hasVideoStreams);
+        //    }
 
-            screenAction.NextAction = newAction;
-        }
+        //    screenAction.NextAction = newAction;
+        //}
 
         public Scene GetSceneFromScreenId(int screenId)
         {
@@ -526,17 +526,17 @@ namespace Assets.Scripts
             return sceneId;
         }
 
-        public void RandomTeleportation(int currentSceneId)
-        {
-            int numberOfScenes = Scenes.Count - 1; // Do not include final scene
-            int randomSceneId;
-            do
-            {
-                randomSceneId = (int)Math.Ceiling(Random.value * numberOfScenes);
-            } while (randomSceneId == currentSceneId);
+        //public void RandomTeleportation(int currentSceneId)
+        //{
+        //    int numberOfScenes = Scenes.Count - 1; // Do not include final scene
+        //    int randomSceneId;
+        //    do
+        //    {
+        //        randomSceneId = (int)Math.Ceiling(Random.value * numberOfScenes);
+        //    } while (randomSceneId == currentSceneId);
 
-            StartCoroutine(DoTeleportation(randomSceneId));
-        }
+        //    StartCoroutine(DoTeleportation(randomSceneId));
+        //}
 
         public IEnumerator DoTeleportation(int sceneId, bool scatter = false)
         {
@@ -793,7 +793,9 @@ namespace Assets.Scripts
 
             Transform container = RemoveGameObjectsFromContainer("VideoStreamSelectButtons", "Button");
 
-            var agoraUsers = AgoraController.instance.AgoraUsers;
+            var agoraUsers = new List<AgoraUser>();
+
+            //var agoraUsers = AgoraController.instance.AgoraUsers;
             Debug.Log($"agoraUsers: {agoraUsers.Count}");
 
             if (agoraUsers != null)
@@ -1238,7 +1240,7 @@ namespace Assets.Scripts
                             else
                             {
                                 agoraUser.DisplayId = displayId;
-                                AgoraController.instance.AssignStreamToDisplay(agoraUser);
+                                //AgoraController.instance.AssignStreamToDisplay(agoraUser);
                             }
                         }
                     }
