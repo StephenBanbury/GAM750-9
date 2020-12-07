@@ -53,6 +53,7 @@ namespace Assets.Scripts
         private int _currentVideoStream;
         private int _compositeScreenId = 0;
         private float _buttonOffset = 31f;
+        private bool _interfaceIsOn = true;
 
         public int SelectedVideo { set => _lastSelectedVideoId = value; }
         public int SelectedStream { set => _lastSelectedStreamId = value; }
@@ -469,20 +470,7 @@ namespace Assets.Scripts
             SpawnScreenSelectButtons();
 
             MyCurrentScene = Scene.Scene1;
-            //OffsetPlayerPositionWithinScene();
         }
-
-        //public void CreatePortal(int screenId, bool isActive)
-        //{
-        //    AssignPortalToScreen(screenId, isActive);
-        //    StoreRealtimeScreenPortalState(screenId, isActive);
-        //}
-
-        //public ScreenAction GetNextScreenAction(int screenId)
-        //{
-        //    var screenAction = ScreenActions.FirstOrDefault(a => a.ScreenId == screenId);
-        //    return screenAction.NextAction;
-        //}
 
         public void SetNextScreenAction(int screenId)
         {
@@ -1156,88 +1144,95 @@ namespace Assets.Scripts
 
                 var displaySuffix = "Wide";
 
-            var canvasDisplayName = $"CanvasDisplay{displaySuffix}";
-            var videoDisplayName = $"VideoDisplay{displaySuffix}";
+                var canvasDisplayName = $"CanvasDisplay{displaySuffix}";
+                var videoDisplayName = $"VideoDisplay{displaySuffix}";
 
-            if (videoId > 0 && screenId > 0) // && _displayVideo[localDisplayId].Id != videoId)
-            {
-                Transform screenObject = GetScreenObjectFromScreenId(screenId);
-
-                var thisVideoClip = Videos.First(v => v.Id == videoId);
-
-                Debug.Log($"Show video '{thisVideoClip.Title}' on display {screenObject.name}");
-
-                var videoDisplay = screenObject.transform.Find(videoDisplayName);
-                var canvasDisplay = screenObject.transform.Find(canvasDisplayName);
-
-                videoDisplay.gameObject.SetActive(true);
-                canvasDisplay.gameObject.SetActive(false);
-
-                var videoPlayer = videoDisplay.GetComponentInChildren<VideoPlayer>();
-
-                //Add AudioSource
-                //AudioSource audioSource = gameObject.AddComponent<AudioSource>();
-
-                bool isPlaying = false;
-
-                if (thisVideoClip.Source == Source.Url)
+                if (videoId > 0 && screenId > 0) // && _displayVideo[localDisplayId].Id != videoId)
                 {
-                    //Debug.Log($"new path: {thisVideoClip.LocalPath}; current path on {videoPlayer.name}: {videoPlayer.url}");
+                    Transform screenObject = GetScreenObjectFromScreenId(screenId);
 
-                    if (thisVideoClip.LocalPath == videoPlayer.url)
+                    var thisVideoClip = Videos.First(v => v.Id == videoId);
+
+                    Debug.Log($"Show video '{thisVideoClip.Title}' on display {screenObject.name}");
+
+                    var videoDisplay = screenObject.transform.Find(videoDisplayName);
+                    var canvasDisplay = screenObject.transform.Find(canvasDisplayName);
+
+                    videoDisplay.gameObject.SetActive(true);
+                    canvasDisplay.gameObject.SetActive(false);
+
+                    var videoPlayer = videoDisplay.GetComponentInChildren<VideoPlayer>();
+
+                    //Add AudioSource
+                    AudioSource audioSource = gameObject.AddComponent<AudioSource>();
+
+                    bool isPlaying = false;
+
+                    if (thisVideoClip.Source == Source.Url)
                     {
-                        Debug.Log($"Video {videoId} is already playing on screen {screenId}");
-                        isPlaying = true;
+                        //Debug.Log($"new path: {thisVideoClip.LocalPath}; current path on {videoPlayer.name}: {videoPlayer.url}");
+
+                        if (thisVideoClip.LocalPath == videoPlayer.url)
+                        {
+                            Debug.Log($"Video {videoId} is already playing on screen {screenId}");
+                            isPlaying = true;
+                        }
+                        else
+                        {
+                            // Video clip from Url
+                            Debug.Log("URL video clip");
+
+                            videoPlayer.source = VideoSource.Url;
+
+                            // Set mode to Audio Source.
+                            videoPlayer.audioOutputMode = VideoAudioOutputMode.AudioSource;
+
+                            // We want to control one audio track with the video player
+                            videoPlayer.controlledAudioTrackCount = 1;
+
+                            // We enable the first track, which has the id zero
+                            videoPlayer.EnableAudioTrack(0, true);
+
+                            // ...and we set the audio source for this track
+                            videoPlayer.SetTargetAudioSource(0, audioSource);
+
+
+                            videoPlayer.url = thisVideoClip.LocalPath;
+
+                            StartCoroutine(PrepareVideo(videoPlayer));
+                        }
                     }
                     else
                     {
-                        // Video clip from Url
-                        Debug.Log("URL video clip");
-
-                        videoPlayer.source = VideoSource.Url;
-                        videoPlayer.url = thisVideoClip.LocalPath;
+                        // Video clip from local storage
+                        Debug.Log("Local video clip");
+                        var vc = _videoClips[videoId - 1];
+                        videoPlayer.clip = vc;
                     }
-                }
-                else
-                {
-                    // Video clip from local storage
-                    Debug.Log("Local video clip");
-                    var vc = _videoClips[videoId - 1];
-                    videoPlayer.clip = vc;
-                }
-
-                //Disable Play on Awake for both Video and Audio
-                videoPlayer.playOnAwake = false;
-                //audioSource.playOnAwake = false;
-                //audioSource.Pause();
-
-                //Set Audio Output to AudioSource
-                //videoPlayer.audioOutputMode = VideoAudioOutputMode.AudioSource;
-
-                //Assign the Audio from Video to AudioSource to be played
-                //videoPlayer.EnableAudioTrack(0, true);
-                //videoPlayer.SetTargetAudioSource(0, audioSource);
-
-                // TODO test to see if this speeds up or slows down video play start
-                //Set video To Play then prepare Audio to prevent Buffering        
-                //videoPlayer.Prepare();
-
-                //Play Video
-                if (!isPlaying) videoPlayer.Play();
-
-                    //Play Sound
-                    //audioSource.Play();
 
                     return true;
-            }
+                }
 
-            return false;
+                return false;
+
             }
             catch (Exception exception)
             {
                 Debug.Log(exception);
                 return false;
             }
+        }
+
+        IEnumerator PrepareVideo(VideoPlayer videoPlayer)
+        {
+            videoPlayer.Prepare();
+
+            while (!videoPlayer.isPrepared)
+            {
+                yield return new WaitForEndOfFrame();
+            }
+
+            videoPlayer.Play();
         }
 
         private bool AssignStreamToDisplay(int streamId, int displayId)
@@ -1573,6 +1568,14 @@ namespace Assets.Scripts
                     vp.Play();
                 }
             }
+        }
+
+        public void toggleInterface()
+        {
+            _interfaceIsOn = !_interfaceIsOn;
+            GameObject controllerUi = GameObject.FindGameObjectWithTag("ControllerUI");
+            var canvas = controllerUi.GetComponent<Canvas>();
+            canvas.enabled = _interfaceIsOn;
         }
     }
 }
