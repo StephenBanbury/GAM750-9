@@ -32,236 +32,231 @@ namespace Assets.Scripts
         [SerializeField] private string _roomName;
         [SerializeField] private Text _statusText;
 
+        public List<AgoraUser> AgoraUsers
+        {
+            get { return _joinedUsers; }
+        }
 
         private List<AgoraUser> _joinedUsers = new List<AgoraUser>();
 
-        public List<AgoraUser> AgoraUsers
+        void Awake()
         {
-            get
+#if (UNITY_ANDROID)
+                    //permissionList.Add(Permission.Microphone);
+                    //permissionList.Add(Permission.Camera);
+#endif
+
+            if (instance == null)
             {
-                //return _joinedUsers; 
-                return new List<AgoraUser>();
+                instance = this;
+            }
+            else if (instance != this)
+            {
+                Destroy(gameObject);
+            }
+
+            // keep this alive across scenes
+            DontDestroyOnLoad(this.gameObject);
+
+            _statusText.text = "";
+
+            JoinRoom();
+        }
+
+        void Update()
+        {
+            CheckPermissions();
+        }
+
+        public void UserJoinsRoom(uint uid)
+        {
+            if (uid < 99999999)
+            {
+                Debug.Log("Agora: UserJoinsRoom");
+
+                var userAlreadyJoined = _joinedUsers.Any(u => u.Uid == uid);
+
+                if (userAlreadyJoined)
+                {
+                    Debug.Log($"Agora: User already joined");
+                }
+                else
+                {
+                    var newId = _joinedUsers.Any() ? _joinedUsers.Max(u => u.Id) + 1 : 1;
+
+                    var agoraUser = new AgoraUser
+                    {
+                        Id = newId,
+                        Uid = uid,
+                        DateJoined = DateTime.UtcNow,
+                        Display = false
+                    };
+
+                    _joinedUsers.Add(agoraUser);
+
+                    Debug.Log($"Agora: Number joined: {_joinedUsers.Count}");
+                    foreach (var user in _joinedUsers)
+                    {
+                        Debug.Log($" - Uid: {user.Uid})");
+                    }
+
+                    MediaDisplayManager.instance.SpawnVideoStreamSelectButtons();
+                }
             }
         }
 
-        //        void Awake()
-        //        {
-        //#if (UNITY_ANDROID)
-        //            //permissionList.Add(Permission.Microphone);
-        //            //permissionList.Add(Permission.Camera);
-        //#endif
+        public void UserLeavesRoom(uint uid)
+        {
+            var leavingUser = _joinedUsers.FirstOrDefault(u => u.Uid == uid);
+            if (leavingUser != null)
+            {
+                _joinedUsers.Remove(leavingUser);
 
-        //            if (instance == null)
-        //            {
-        //                instance = this;
-        //            }
-        //            else if (instance != this)
-        //            {
-        //                Destroy(gameObject);
-        //            }
+                GameObject go = GameObject.Find(uid.ToString());
+                if (!ReferenceEquals(go, null))
+                {
+                    UnityEngine.Object.Destroy(go);
+                }
 
-        //            // keep this alive across scenes
-        //            DontDestroyOnLoad(this.gameObject);
+                MediaDisplayManager.instance.SpawnVideoStreamSelectButtons();
+            }
+        }
 
-        //            _statusText.text = "";
+        public void AssignStreamToDisplay(AgoraUser agoraUser)
+        {
+            Debug.Log("Agora: AssignStreamToDisplay");
 
-        //            //JoinRoom();
-        //        }
+            // Create a GameObject and assign to this new user
+            VideoSurface videoSurface = MakeImageSurface(agoraUser);
 
-        //void Update()
-        //{
-        //    CheckPermissions();
-        //}
+            if (!ReferenceEquals(videoSurface, null))
+            {
+                // configure videoSurface
+                videoSurface.SetForUser(agoraUser.Uid);
+                videoSurface.SetEnable(true);
+                videoSurface.SetVideoSurfaceType(AgoraVideoSurfaceType.RawImage);
+                videoSurface.SetGameFps(30);
+            }
+        }
 
-        //public void UserJoinsRoom(uint uid)
-        //{
-        //    if (uid < 99999999)
-        //    {
-        //        Debug.Log("Agora: UserJoinsRoom");
+        private VideoSurface MakeImageSurface(AgoraUser user)
+        {
+            var displaySuffix = "Wide";
 
-        //        var userAlreadyJoined = _joinedUsers.Any(u => u.Uid == uid);
+            var canvasDisplayName = $"CanvasDisplay{displaySuffix}";
+            var videoDisplayName = $"VideoDisplay{displaySuffix}";
 
-        //        if (userAlreadyJoined)
-        //        {
-        //            Debug.Log($"Agora: User already joined");
-        //        }
-        //        else
-        //        {
-        //            var newId = _joinedUsers.Any() ? _joinedUsers.Max(u => u.Id) + 1 : 1;
+            Debug.Log("Agora: MakeImageSurface");
 
-        //            var agoraUser = new AgoraUser
-        //            {
-        //                Id = newId,
-        //                Uid = uid,
-        //                DateJoined = DateTime.UtcNow,
-        //                Display = false
-        //            };
+            // find a game object to render video stream from 'uid'
 
-        //            _joinedUsers.Add(agoraUser);
+            var goName = user.Uid.ToString();
+            var displayId = user.DisplayId;
+            var displayName = $"{goName}_{displayId}";
+            var sceneId = int.Parse(displayId.ToString().Substring(0, 1));
 
-        //            Debug.Log($"Agora: Number joined: {_joinedUsers.Count}");
-        //            foreach (var user in _joinedUsers)
-        //            {
-        //                Debug.Log($" - Uid: {user.Uid})");
-        //            }
+            //Debug.Log($"In MakeImageSurface. displayName: {displayName}");
 
-        //            MediaDisplayManager.instance.SpawnVideoStreamSelectButtons();
-        //        }
-        //    }
-        //}
+            GameObject go = GameObject.Find(displayName);
 
-        //public void UserLeavesRoom(uint uid)
-        //{
-        //    var leavingUser = _joinedUsers.FirstOrDefault(u => u.Uid == uid);
-        //    if (leavingUser != null)
-        //    {
-        //        _joinedUsers.Remove(leavingUser);
+            if (!ReferenceEquals(go, null))
+            {
+                return null;
+            }
 
-        //        GameObject go = GameObject.Find(uid.ToString());
-        //        if (!ReferenceEquals(go, null))
-        //        {
-        //            UnityEngine.Object.Destroy(go);
-        //        }
+            go = new GameObject { name = displayName };
 
-        //        MediaDisplayManager.instance.SpawnVideoStreamSelectButtons();
-        //    }
-        //}
+            // To be rendered onto
+            go.AddComponent<RawImage>();
 
-        //public void AssignStreamToDisplay(AgoraUser agoraUser)
-        //{
-        //    Debug.Log("Agora: AssignStreamToDisplay");
+            var screensContainerName = $"Screens {sceneId}";
+            var screenName = $"Screen {displayId}";
+            var screenVariantName = $"Screen Variant {displayId}";
 
-        //    // Create a GameObject and assign to this new user
-        //    VideoSurface videoSurface = MakeImageSurface(agoraUser);
+            var screensContainer = GameObject.Find(screensContainerName);
+            var screenObject = screensContainer.transform.Find(screenName);
+            if (screenObject == null) screenObject = screensContainer.transform.Find(screenVariantName);
 
-        //    if (!ReferenceEquals(videoSurface, null))
-        //    {
-        //        // configure videoSurface
-        //        videoSurface.SetForUser(agoraUser.Uid);
-        //        videoSurface.SetEnable(true);
-        //        videoSurface.SetVideoSurfaceType(AgoraVideoSurfaceType.RawImage);
-        //        videoSurface.SetGameFps(30);
-        //    }
-        //}
+            //Debug.Log($"screenObject: {screenObject.name}");
 
-        //private VideoSurface MakeImageSurface(AgoraUser user)
-        //{
-        //    var displaySuffix = "Wide";
+            var videoDisplay = screenObject.transform.Find(videoDisplayName);
+            var canvasDisplay = screenObject.transform.Find(canvasDisplayName);
 
-        //    var canvasDisplayName = $"CanvasDisplay{displaySuffix}";
-        //    var videoDisplayName = $"VideoDisplay{displaySuffix}";
+            videoDisplay.gameObject.SetActive(false);
+            canvasDisplay.gameObject.SetActive(true);
 
-        //    Debug.Log("Agora: MakeImageSurface");
+            //Debug.Log($"canvasDisplay: {canvasDisplay.name}");
 
-        //    // find a game object to render video stream from 'uid'
+            VideoSurface videoSurface;
 
-        //    var goName = user.Uid.ToString();
-        //    var displayId = user.DisplayId;
-        //    var displayName = $"{goName}_{displayId}";
-        //    var sceneId = int.Parse(displayId.ToString().Substring(0, 1));
+            // If display canvas already has an agora video surface it will be re-used
+            // otherwise, a new surface will be created
+            if (canvasDisplay.transform.childCount > 0)
+            {
+                go = canvasDisplay.transform.GetChild(0).gameObject;
+                videoSurface = go.GetComponent<VideoSurface>();
+            }
+            else
+            {
+                go.transform.SetParent(canvasDisplay.transform);
+                go.transform.localEulerAngles = Vector3.zero;
+                go.transform.localPosition = Vector3.zero;
+                go.transform.localScale = new Vector3(0.19f, 0.39f, 0.1f);
 
-        //    //Debug.Log($"In MakeImageSurface. displayName: {displayName}");
+                videoSurface = go.AddComponent<VideoSurface>();
+            }
 
-        //    GameObject go = GameObject.Find(displayName);
+            return videoSurface;
+        }
 
-        //    if (!ReferenceEquals(go, null))
-        //    {
-        //        return null;
-        //    }
-
-        //    go = new GameObject {name = displayName};
-
-        //    // To be rendered onto
-        //    go.AddComponent<RawImage>();
-
-        //    var screensContainerName = $"Screens {sceneId}";
-        //    var screenName = $"Screen {displayId}";
-        //    var screenVariantName = $"Screen Variant {displayId}";
-
-        //    var screensContainer = GameObject.Find(screensContainerName);
-        //    var screenObject = screensContainer.transform.Find(screenName);
-        //    if (screenObject == null) screenObject = screensContainer.transform.Find(screenVariantName);
-
-        //    //Debug.Log($"screenObject: {screenObject.name}");
-
-        //    var videoDisplay = screenObject.transform.Find(videoDisplayName);
-        //    var canvasDisplay = screenObject.transform.Find(canvasDisplayName);
-
-        //    videoDisplay.gameObject.SetActive(false);
-        //    canvasDisplay.gameObject.SetActive(true);
-
-        //    //Debug.Log($"canvasDisplay: {canvasDisplay.name}");
-
-        //    VideoSurface videoSurface;
-
-        //    // If display canvas already has an agora video surface it will be re-used
-        //    // otherwise, a new surface will be created
-        //    if (canvasDisplay.transform.childCount > 0)
-        //    {
-        //        go = canvasDisplay.transform.GetChild(0).gameObject;
-        //        videoSurface = go.GetComponent<VideoSurface>();
-        //    }
-        //    else
-        //    {
-        //        go.transform.SetParent(canvasDisplay.transform);
-        //        go.transform.localEulerAngles = Vector3.zero;
-        //        go.transform.localPosition = Vector3.zero;
-        //        go.transform.localScale = new Vector3(0.19f, 0.39f, 0.1f);
-
-        //        videoSurface = go.AddComponent<VideoSurface>();
-        //    }
-
-        //    return videoSurface;
-        //}
-
-        //private void CheckAppId()
-        //{
-        //    Debug.Assert(_appID.Length > 10, "Please fill in your AppId first on Game Controller object.");
-        //}
+        private void CheckAppId()
+        {
+            Debug.Assert(_appID.Length > 10, "Please fill in your AppId first on Game Controller object.");
+        }
 
         /// <summary>
         ///   Checks for platform dependent permissions.
         /// </summary>
-        //        private void CheckPermissions()
-        //        {
-        //#if (UNITY_ANDROID)
-        //            foreach (string permission in permissionList)
-        //            {
-        //                if (!Permission.HasUserAuthorizedPermission(permission))
-        //                {
-        //                    Permission.RequestUserPermission(permission);
-        //                }
-        //            }
-        //#endif
-        //}
+        private void CheckPermissions()
+        {
+#if (UNITY_ANDROID)
+                    foreach (string permission in permissionList)
+                    {
+                        if (!Permission.HasUserAuthorizedPermission(permission))
+                        {
+                            Permission.RequestUserPermission(permission);
+                        }
+                    }
+#endif
+        }
 
-        //public void JoinRoom()
-        //{
-        //    Debug.Log($"Agora: JoinRoom: {_app}");
+        public void JoinRoom()
+        {
+            Debug.Log($"Agora: JoinRoom: {_app}");
 
-        //    // create app if nonexistent
-        //    if (ReferenceEquals(_app, null))
-        //    {
-        //        _app = new AgoraInterface(); // create app
-        //        _app.LoadEngine(_appID); // load engine
-        //    }
+            // create app if nonexistent
+            if (ReferenceEquals(_app, null))
+            {
+                _app = new AgoraInterface(); // create app
+                _app.LoadEngine(_appID); // load engine
+            }
 
-        //    var joined = _app.Join(_roomName);
+            var joined = _app.Join(_roomName);
 
-        //    if (joined)
-        //    {
-        //        _statusText.text = "Live video: connected";
-        //    }
-        //}
+            if (joined)
+            {
+                _statusText.text = "Live video: connected";
+            }
+        }
 
 
-        //void OnApplicationQuit()
-        //{
-        //    if (!ReferenceEquals(_app, null))
-        //    {
-        //        _app.Leave();
-        //        _app.UnloadEngine();
-        //    }
-        //}
+        void OnApplicationQuit()
+        {
+            if (!ReferenceEquals(_app, null))
+            {
+                _app.Leave();
+                _app.UnloadEngine();
+            }
+        }
     }
 }
