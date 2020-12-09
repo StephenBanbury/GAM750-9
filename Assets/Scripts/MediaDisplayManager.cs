@@ -338,45 +338,6 @@ namespace Assets.Scripts
             EnablePortalButton(false);
         }
 
-        public void VideoSelect(int id)
-        {
-            _lastSelectionSelected = 4;
-
-            int nVideos = Videos.Count;
-
-            int temp = _currentVideoClip;
-
-            if (id % 10 == 0)
-            {
-                _currentVideoClip = id;
-            }
-            else if(_currentVideoClip % 10 == 0)
-            {
-                _currentVideoClip += id;
-            }
-            else if (_currentVideoClip == 0)
-            {
-                _currentVideoClip = id;
-            }
-            else
-            {
-                _currentVideoClip = _currentVideoClip - _currentVideoClip % 10 + id;
-            }
-
-            if (_currentVideoClip > nVideos) 
-                _currentVideoClip = temp;
-
-            _currentVideoStream = 0;
-            _videoClipValue.text = _currentVideoClip.ToString();
-
-            _mediaStatePreparation = new MediaScreenDisplayBufferState
-            {
-                MediaTypeId = (int)MediaType.VideoClip,
-                MediaId = id
-            };
-            EnablePortalButton(false);
-        }
-
         public void StreamSelect(int id)
         {
             _lastSelectionSelected = 3;
@@ -391,49 +352,117 @@ namespace Assets.Scripts
                 MediaTypeId = (int)MediaType.VideoStream,
                 MediaId = id
             };
-            
+
             Debug.Log(
                 $"Media state preparation: MediaTypeId = {_mediaStatePreparation.MediaTypeId}; MediaId = {_mediaStatePreparation.MediaId}");
             EnablePortalButton(false);
         }
 
-        public void ScreenSelect(int id)
+        int _hundreds;
+        int _tens;
+        int _ones;
+
+        public void VideoSelect(int id, string buttonName)
         {
-            if(_lastSelectionSelected == 1)
-                EnablePortalButton(true);
+            _lastSelectionSelected = 4;
 
-            _lastSelectionSelected = 5;
-            _screenValue.text = id.ToString();
+            int temp = _currentVideoClip;
 
-            int compositeId = CompoundScreenId(id);
-
-            Debug.Log($"_mediaStatePreparation: {_mediaStatePreparation != null}");
-
-            if (_mediaStatePreparation != null)
+            if (id == 0)
             {
-                var currentScreenState =
-                    _mediaStatePreparationBuffer.FirstOrDefault(s => s.ScreenDisplayId == compositeId);
-
-                if (currentScreenState != null)
+                if (buttonName.Contains("100"))
+                    _hundreds = 0;
+                else if (buttonName.Contains("10"))
+                    _tens = 0;
+                else _ones = 0;
+            }
+            else
+            {
+                if (id % 100 == 0)
                 {
-                    currentScreenState.MediaTypeId = _mediaStatePreparation.MediaTypeId;
-                    currentScreenState.MediaId = _mediaStatePreparation.MediaId;
+                    _hundreds = id;
+                }
+                else if (id % 10 == 0)
+                {
+                    _tens = id;
                 }
                 else
                 {
-                    _mediaStatePreparationBuffer.Add(new MediaScreenDisplayBufferState
-                    {
-                        MediaTypeId = (int)(_currentVideoClip > 0 ? MediaType.VideoClip : MediaType.VideoStream),
-                        MediaId = _currentVideoClip > 0 ? _currentVideoClip : _currentVideoStream,
-                        ScreenDisplayId = compositeId
-                    });
+                    _ones = id;
                 }
+            }
 
-                DisplayBufferText();
+            _currentVideoClip = _hundreds + _tens + _ones;
+
+            _videoClipValue.text = _currentVideoClip.ToString();
+
+            _mediaStatePreparation = new MediaScreenDisplayBufferState
+            {
+                MediaTypeId = (int) MediaType.VideoClip,
+                MediaId = id
+            };
+
+            _currentVideoStream = 0;
+
+            EnablePortalButton(false);
+        }
+
+        public void ScreenSelect(int id)
+        {
+            int compositeId = CompoundScreenId(id);
+
+            // Last selected = scene
+            if (_lastSelectionSelected == 1)
+                EnablePortalButton(true);
+
+            // Last selected = video clip/stream
+            if (_lastSelectionSelected == 3 || _lastSelectionSelected == 4 || _lastSelectionSelected == 5)
+            {
+
+                if (_currentVideoClip > 0 && Videos.All(v => v.Id != _currentVideoClip))
+                {
+                    Debug.Log($"Video clip {_currentVideoClip} does not exist");
+                    _screenValue.text = "";
+                    _videoClipValue.text = "";
+                    _currentVideoClip = 0;
+                    _hundreds = 0;
+                    _tens = 0;
+                    _ones = 0;
+                }
+                else
+                {
+                    _screenValue.text = id.ToString();
+
+                    if (_mediaStatePreparation != null)
+                    {
+                        var currentScreenState =
+                            _mediaStatePreparationBuffer.FirstOrDefault(s => s.ScreenDisplayId == compositeId);
+
+                        if (currentScreenState != null)
+                        {
+                            currentScreenState.MediaTypeId = _mediaStatePreparation.MediaTypeId;
+                            currentScreenState.MediaId = _mediaStatePreparation.MediaId;
+                        }
+                        else
+                        {
+                            _mediaStatePreparationBuffer.Add(new MediaScreenDisplayBufferState
+                            {
+                                MediaTypeId =
+                                    (int) (_currentVideoClip > 0 ? MediaType.VideoClip : MediaType.VideoStream),
+                                MediaId = _currentVideoClip > 0 ? _currentVideoClip : _currentVideoStream,
+                                ScreenDisplayId = compositeId
+                            });
+                        }
+
+                        DisplayBufferText();
+
+                        _lastSelectionSelected = 5;
+                    }
+                }
             }
 
             _compositeScreenId = compositeId;
-            ShowPortalButtonState();
+            //ShowPortalButtonState();
         }
 
         public void PortalSelect()
@@ -442,7 +471,7 @@ namespace Assets.Scripts
 
             if (_lastSelectionSelected == 5 && _currentSceneId > 0 && _compositeScreenId > 0)
             {
-                ShowPortalButtonState();
+                //ShowPortalButtonState();
                 Clear();
                 _lastSelectionSelected = 6;
             }else if (_lastSelectionSelected != 5)
@@ -453,20 +482,22 @@ namespace Assets.Scripts
 
         }
 
-        //public void PortalSelect()
-        //{
-        //    if (_compositeScreenId > 0)
-        //    {
-        //        StoreRealtimeScreenPortalState();
-        //        ShowPortalButtonState();
-        //        Clear();
-        //    }
-        //}
-
         private void EnablePortalButton(bool enable)
         {
             Button button = GameObject.Find("PortalSelectButton").GetComponent<Button>();
             button.enabled = enable;
+            Text portalButtonText = GameObject.Find("PortalSelectButtonText").GetComponent<Text>();
+            if (portalButtonText != null)
+            {
+                if (enable)
+                {
+                    portalButtonText.text = "Set";
+                }
+                else
+                {
+                    portalButtonText.text = "";
+                }
+            }
         }
 
         // Get current portal state and show on button
@@ -491,6 +522,11 @@ namespace Assets.Scripts
 
         public void Clear()
         {
+            _hundreds = 0;
+            _tens = 0;
+            _ones = 0;
+            _currentVideoClip = 0;
+            _currentVideoStream = 0;
             _mediaStatePreparationBuffer.Clear();
             DisplayBufferText();
         }
@@ -834,23 +870,20 @@ namespace Assets.Scripts
             if (nVideos > 0)
             {
                 float xLeft = 50;
+
+                // 100s
+
                 float yPos = 50;
-                int nTens = nVideos / 10;
 
-                Debug.Log($"nTens: {nTens}");
-
-                for (int i = 1; i <= nVideos / 10; i++)
+                for (int i = 0; i <= 9; i++)
                 {
-                    int x;
-                    int v;
+                    var x = i * 100;
 
-                    x = i * 10;
-                    //v = i;
-
-                    var xPos = xLeft + (i - 1) * _buttonOffset;
+                    var xPos = xLeft + i * _buttonOffset;
 
                     var button = Instantiate(_button1);
-                    button.name = $"Button{x}";
+                    string buttonName = $"Button{x} 100";
+                    button.name = buttonName;
 
                     button.transform.SetParent(container);
                     button.transform.localPosition = new Vector2(xPos, yPos);
@@ -859,20 +892,49 @@ namespace Assets.Scripts
                     buttonText.text = x.ToString();
                     buttonText.fontStyle = FontStyle.Bold;
 
-                    int param = x;
+                    int val = x;
                     //button.onClick.AddListener(delegate { VideoSelect(i); });
-                    button.onClick.AddListener(() => VideoSelect(param));
+                    button.onClick.AddListener(() => VideoSelect(val, buttonName));
                 }
 
+                // 10s
 
                 yPos = yPos - _buttonOffset;
 
-                for (int i = 1; i <= 9; i++)
+                for (int i = 0; i <= 9; i++)
                 {
-                    var xPos = xLeft + (i - 1) * _buttonOffset;
+                    var x = i * 10;
+
+                    var xPos = xLeft + i * _buttonOffset;
 
                     var button = Instantiate(_button1);
-                    button.name = $"Button{i}";
+                    string buttonName = $"Button{x} 10";
+                    button.name = buttonName;
+
+                    button.transform.SetParent(container);
+                    button.transform.localPosition = new Vector2(xPos, yPos);
+
+                    Text buttonText = button.GetComponentInChildren<Text>();
+                    buttonText.text = x.ToString();
+                    buttonText.fontStyle = FontStyle.Bold;
+
+                    int val = x;
+                    //button.onClick.AddListener(delegate { VideoSelect(i); });
+                    button.onClick.AddListener(() => VideoSelect(val, buttonName));
+                }
+
+
+                // 1s
+
+                yPos = yPos - _buttonOffset;
+
+                for (int i = 0; i <= 9; i++)
+                {
+                    var xPos = xLeft + i * _buttonOffset;
+
+                    var button = Instantiate(_button1);
+                    string buttonName = $"Button{i} 1";
+                    button.name = buttonName;
 
                     button.transform.SetParent(container);
                     button.transform.localPosition = new Vector2(xPos, yPos);
@@ -881,9 +943,9 @@ namespace Assets.Scripts
                     buttonText.text = i.ToString();
                     buttonText.fontStyle = FontStyle.Bold;
 
-                    int param = i;
+                    int val = i;
                     //button.onClick.AddListener(delegate { VideoSelect(i); });
-                    button.onClick.AddListener(() => VideoSelect(param));
+                    button.onClick.AddListener(() => VideoSelect(val, buttonName));
                 }
             }
         }
@@ -1061,7 +1123,12 @@ namespace Assets.Scripts
                     model.mediaScreenDisplayStates.FirstOrDefault(s => s.screenDisplayId == buffer.ScreenDisplayId);
 
                 Debug.Log($"StoreRealtimeScreenMediaState. Exists: {existing != null}");
-                Debug.Log($"buffer.ScreenDisplayId: {buffer.ScreenDisplayId}; buffer.MediaTypeId: {buffer.MediaTypeId}; buffer.MediaId: {buffer.MediaId}");
+                Debug.Log($"buffer.Screen: {buffer.ScreenDisplayId}; buffer.MediaType: {buffer.MediaTypeId}; buffer.MediaId: {buffer.MediaId}");
+
+                if (buffer.MediaTypeId == (int) MediaType.VideoClip)
+                {
+                    Debug.Log($"Video title: {Videos.FirstOrDefault(v => v.Id == buffer.MediaId).Title}");
+                }
 
                 if (existing != null)
                 {
@@ -1566,6 +1633,8 @@ namespace Assets.Scripts
 
             foreach (var screenPosition in thisFormation)
             {
+                var screenId = _sceneIndex * 100 + screenPosition.Id;
+
                 if (!screenPosition.Hide)
                 {
                     var vector3 = screenPosition.Vector3;
@@ -1573,7 +1642,6 @@ namespace Assets.Scripts
 
                     GameObject screen;
 
-                    var screenId = _sceneIndex * 100 + screenPosition.Id;
                     GameObject thisScreen;
                     string screenName;
 
@@ -1609,13 +1677,13 @@ namespace Assets.Scripts
 
                     currentScene.CurrentScreens.Add(screen);
 
-                    ScreenActions.Add(new ScreenActionModel
-                    {
-                        ScreenId = screenId
-                    });
-
                     //SetNextScreenAction(screenId);
                 }
+
+                ScreenActions.Add(new ScreenActionModel
+                {
+                    ScreenId = screenId
+                });
             }
 
             _sceneIndex++;

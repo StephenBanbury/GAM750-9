@@ -39,12 +39,28 @@ namespace Assets.Scripts.Services
                             var fileName = video.Url.Substring(startPos + 1, video.Url.Length - startPos - 1);
                             video.Filename = fileName.Replace("%20", "_");
 
-                            Debug.Log($"VideosGet: {video.Title} / {video.Filename} / {video.Url}");
+                            int spacePos = video.Title.IndexOf(" ", StringComparison.Ordinal);
+                            string idText = video.Title.Substring(0, spacePos + 1).Trim();
 
-                            video.MediaType = MediaType.VideoClip;
-                            video.Source = Source.Url;
-                            video.Id = i;
-                            videoList.Add(video);
+                            Debug.Log($"Video ID: {idText}");
+
+                            int id;
+                            bool isInt = int.TryParse(idText, out id);
+
+                            if (isInt)
+                            {
+                                Debug.Log($"VideosGet: {video.Title} / {video.Filename} / {video.Url}");
+
+                                video.MediaType = MediaType.VideoClip;
+                                video.Source = Source.Url;
+                                video.Id = id;
+                                videoList.Add(video);
+                            }
+                            else
+                            {
+                                Debug.Log($"Id for video clip {video.Title} is in an incorrect format");
+                            }
+
                             i++;
                         }
                     }
