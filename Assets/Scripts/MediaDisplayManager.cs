@@ -525,8 +525,8 @@ namespace Assets.Scripts
             _hundreds = 0;
             _tens = 0;
             _ones = 0;
-            _currentVideoClip = 0;
-            _currentVideoStream = 0;
+            //_currentVideoClip = 0;
+            //_currentVideoStream = 0;
             _mediaStatePreparationBuffer.Clear();
             DisplayBufferText();
         }
@@ -956,7 +956,7 @@ namespace Assets.Scripts
 
             Transform container = RemoveGameObjectsFromContainer("VideoStreamSelectButtons", "Button");
 
-            var agoraUsers = new List<AgoraUser>();
+            var agoraUsers = AgoraController.instance.AgoraUsers;
 
             //var agoraUsers = AgoraController.instance.AgoraUsers;
             Debug.Log($"agoraUsers: {agoraUsers.Count}");
@@ -1477,7 +1477,7 @@ namespace Assets.Scripts
                             else
                             {
                                 agoraUser.DisplayId = displayId;
-                                //AgoraController.instance.AssignStreamToDisplay(agoraUser);
+                                AgoraController.instance.AssignStreamToDisplay(agoraUser);
                             }
                         }
                     }
