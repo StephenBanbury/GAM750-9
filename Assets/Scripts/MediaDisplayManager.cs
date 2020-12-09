@@ -322,13 +322,19 @@ namespace Assets.Scripts
         {
             Debug.Log($"FormationId: {id}");
 
-            _lastSelectionSelected = 2;
+            bool canDoFormation = CanTransformScene.Contains((Scene) _currentSceneId);
+            
+            if (canDoFormation)
+            {
+                _lastSelectionSelected = 2;
 
-            _formationValue.text = id.ToString();
+                _formationValue.text = id.ToString();
 
-            var formationSyncScript = gameObject.GetComponent<FormationSelectSync>();
-            int compoundId = CompoundFormationId(id);
-            formationSyncScript.SetId(compoundId);
+                var formationSyncScript = gameObject.GetComponent<FormationSelectSync>();
+                int compoundId = CompoundFormationId(id);
+                formationSyncScript.SetId(compoundId);
+            }
+
             EnablePortalButton(false);
         }
 
@@ -1560,8 +1566,8 @@ namespace Assets.Scripts
 
             foreach (var screenPosition in thisFormation)
             {
-                //if (!screenPosition.Hide)
-                //{
+                if (!screenPosition.Hide)
+                {
                     var vector3 = screenPosition.Vector3;
                     vector3.y += _floorAdjust;
 
@@ -1609,7 +1615,7 @@ namespace Assets.Scripts
                     });
 
                     //SetNextScreenAction(screenId);
-                //}
+                }
             }
 
             _sceneIndex++;
