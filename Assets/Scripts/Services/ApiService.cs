@@ -44,8 +44,7 @@ namespace Assets.Scripts.Services
 
                             Debug.Log($"Video ID: {idText}");
 
-                            int id;
-                            bool isInt = int.TryParse(idText, out id);
+                            bool isInt = int.TryParse(idText, out var id);
 
                             if (isInt)
                             {
