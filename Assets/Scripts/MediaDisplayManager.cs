@@ -5,6 +5,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Assets.Scripts.Enums;
 using Assets.Scripts.Services;
 using DG.Tweening;
@@ -592,6 +593,8 @@ namespace Assets.Scripts
                 $"External={Videos.Count(v => v.Source == Source.Url)}");
 
             yield return StartCoroutine(DownloadVideoFiles(Videos));
+
+            //DownloadVideoFilesSynchronous(Videos);
 
             Scenes = new List<SceneDetail>();
             ScreenActions = new List<ScreenActionModel>();

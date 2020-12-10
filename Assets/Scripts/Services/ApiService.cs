@@ -37,7 +37,7 @@ namespace Assets.Scripts.Services
 
                             var startPos = video.Url.LastIndexOf("/");
                             var fileName = video.Url.Substring(startPos + 1, video.Url.Length - startPos - 1);
-                            video.Filename = fileName.Replace("%20", "_");
+                            video.Filename = fileName.Replace("%20", " ");
 
                             int spacePos = video.Title.IndexOf(" ", StringComparison.Ordinal);
                             string idText = video.Title.Substring(0, spacePos + 1).Trim();
