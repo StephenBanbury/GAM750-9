@@ -139,6 +139,9 @@ namespace Assets.Scripts
             {
                 Debug.Log($"currentModel != null. Models: {currentModel.mediaScreenDisplayStates.Count}");
 
+                AssignMediaToDisplaysFromArray();
+                AssignPortalToDisplaysFromArray();
+
                 // Let us know when a new screen has changed 
                 currentModel.mediaScreenDisplayStates.modelAdded += MediaAssignedToDisplay;
                 currentModel.screenPortalStates.modelAdded += PortalAssignedToDisplay;
