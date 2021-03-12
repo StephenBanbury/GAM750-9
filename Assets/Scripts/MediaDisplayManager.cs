@@ -669,66 +669,92 @@ namespace Assets.Scripts
             return sceneId;
         }
 
-        //public void RandomTeleportation(int currentSceneId)
-        //{
-        //    int numberOfScenes = Scenes.Count - 1; // Do not include final scene
-        //    int randomSceneId;
-        //    do
-        //    {
-        //        randomSceneId = (int)Math.Ceiling(Random.value * numberOfScenes);
-        //    } while (randomSceneId == currentSceneId);
+        public int TargetedTeleportation(int screenId)
+        {
+            var buffer = _screenPortalBuffer.FirstOrDefault(s => s.ScreenId == screenId && s.IsPortal);
+            int destinationSceneId = _screenPortalBuffer.First(s => s.ScreenId == screenId && s.IsPortal).DestinationSceneId;
 
-        //    StartCoroutine(DoTeleportation(randomSceneId));
-        //}
+            StartCoroutine(DoTeleportation(destinationSceneId));
+            return destinationSceneId;
+        }
 
         public IEnumerator DoTeleportation(int sceneId, bool scatter = false)
         {
-            Debug.Log("DoTeleportation");
+            string spawnPointName = $"Spawn Point {sceneId}";
+            Transform spawnPoint = GameObject.Find(spawnPointName).transform;
+            Transform player = GameObject.Find("Player").transform;
+            var playerController = player.GetComponent<OVRPlayerController>();
+            var sceneSampleController = player.GetComponent<OVRSceneSampleController>();
 
-            if (sceneId == 9)
+            //Debug.Log($"Teleporting to {spawnPointName}");
+            //Debug.Log($"SpawnPoint position: {spawnPoint.position}");
+
+            playerController.enabled = false;
+            sceneSampleController.enabled = false;
+
+            PlayerAudioManager.instance.PlayAudioClip("Teleport 3_1");
+
+            yield return new WaitForSeconds(2f);
+
+            PlayerAudioManager.instance.PlayAudioClip("Teleport 3_2");
+
+            Vector3 newPosition = spawnPoint.position;
+
+            if (scatter)
             {
-                string spawnPointName = $"Spawn Point {sceneId}";
-                Transform spawnPoint = GameObject.Find(spawnPointName).transform;
-                Transform camera = GameObject.Find("Main Camera").transform;
-
-                //var playerController = player.GetComponent<OVRPlayerController>();
-                //var sceneSampleController = player.GetComponent<OVRSceneSampleController>();
-
-                //Debug.Log($"Teleporting to {spawnPointName}");
-                //Debug.Log($"SpawnPoint position: {spawnPoint.position}");
-
-                //playerController.enabled = false;
-                //sceneSampleController.enabled = false;
-
-                //PlayerAudioManager.instance.PlayAudioClip("Teleport 3_1");
-
-                yield return new WaitForSeconds(2f);
-
-                //PlayerAudioManager.instance.PlayAudioClip("Teleport 3_2");
-
-                //if (scatter)
-                //{
-                //    float x = newPosition.x + Random.Range(-1f, 1f);
-                //    float y = newPosition.y + Random.Range(-1f, 1f);
-                //    float z = newPosition.z;
-                //    newPosition = new Vector3(x, y, z);
-                //}
-
-                //camera.position = newPosition;
-
-                SetSkybox(true);
-
-                yield return new WaitForSeconds(0.5f);
-
-                Vector3 newPosition = spawnPoint.position;
-
-                camera.position = newPosition;
-
-                //playerController.enabled = true;
-                //sceneSampleController.enabled = true;
-
-                //MyCurrentScene = (Scene)sceneId;
+                float x = newPosition.x + Random.Range(-1f, 1f);
+                float y = newPosition.y + Random.Range(-1f, 1f);
+                float z = newPosition.z;
+                newPosition = new Vector3(x, y, z);
             }
+
+            player.position = newPosition;
+
+            if (sceneId == 9) MediaDisplayManager.instance.SetSkybox(true);
+
+            yield return new WaitForSeconds(0.5f);
+
+            playerController.enabled = true;
+            sceneSampleController.enabled = true;
+
+            MyCurrentScene = (Scene)sceneId;
+        }
+
+        public void Targeted360CameraPosition(int screenId)
+        {
+            StartCoroutine(GoTo360CameraPosition(screenId));
+        }
+
+        private IEnumerator GoTo360CameraPosition(int sceneId)
+        {
+            string spawnPointName = $"360 Spawn Point {sceneId}";
+            Transform spawnPoint = GameObject.Find(spawnPointName).transform;
+
+            Transform player = GameObject.Find("Main Camera").transform;
+
+            Debug.Log($"Teleporting to {spawnPointName}");
+            Debug.Log($"SpawnPoint position: {spawnPoint.position}");
+
+            //PlayerAudioManager.instance.PlayAudioClip("Teleport 3_1");
+
+            yield return new WaitForSeconds(2f);
+
+            //PlayerAudioManager.instance.PlayAudioClip("Teleport 3_2");
+
+            Debug.Log($"Teleporting...");
+
+            Vector3 newPosition = spawnPoint.position;
+
+            player.position = newPosition;
+
+            player.eulerAngles = new Vector3(-15f, 0f, -1f);
+
+
+            if (sceneId == 9) MediaDisplayManager.instance.SetSkybox(true);
+
+            yield return new WaitForSeconds(0.5f);
+
+            MyCurrentScene = (Scene)sceneId;
         }
 
         private IEnumerator DownloadVideoFiles(List<MediaDetail> mediaDetails)
