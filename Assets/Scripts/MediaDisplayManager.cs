@@ -1466,6 +1466,8 @@ namespace Assets.Scripts
             }
         }
 
+        // TODO: change this so that PrepareVideo (or even just the videoPlayer.Play() line) runs once all screens have been prepared.
+        // Will need to store them in a temporary array or something like that..
         IEnumerator PrepareVideo(VideoPlayer videoPlayer)
         {
             videoPlayer.Prepare();
