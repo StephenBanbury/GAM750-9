@@ -60,13 +60,16 @@ namespace Assets.Scripts
         private float _buttonOffset = 31f;
         private bool _interfaceIsOn = true;
 
+        private List<VideoPlayer> videoPlayers = new List<VideoPlayer>();
+
         // _lastSelectionSelected = Scene=1; Formation=2; Stream=3; Clip=4; Screen=5; Portal=6
         private int _lastSelectionSelected; 
 
-        public int SelectedVideo { set => _lastSelectedVideoId = value; }
-        public int SelectedStream { set => _lastSelectedStreamId = value; }
-        public int SelectedDisplay { set => _lastSelectedDisplayId = value; }
-        public MediaType SelectedMediaType { set => _lastSelectedMediaType = value; }
+        //public int SelectedVideo { set => _lastSelectedVideoId = value; }
+        //public int SelectedStream { set => _lastSelectedStreamId = value; }
+        //public int SelectedDisplay { set => _lastSelectedDisplayId = value; }
+        //public MediaType SelectedMediaType { set => _lastSelectedMediaType = value; }
+
         public List<SceneDetail> Scenes { get; private set; }
         public List<Scene> CanTransformScene { get; set; }
         public Scene MyCurrentScene { get; set; }
@@ -255,11 +258,15 @@ namespace Assets.Scripts
 
         public void AssignMediaToDisplaysFromArray()
         {
+            Debug.Log("In AssignMediaToDisplaysFromArray");
+
             foreach (var mediaInfo in model.mediaScreenDisplayStates)
             {
                 var exists = _mediaStateBuffer.FirstOrDefault(m =>
                     m.ScreenDisplayId == mediaInfo.screenDisplayId && m.MediaTypeId == mediaInfo.mediaTypeId &&
                     m.MediaId == mediaInfo.mediaId);
+
+                Debug.Log($"AssignMediaToDisplaysFromArray - exists: {exists}");
 
                 if (exists != null)
                 {
@@ -268,6 +275,7 @@ namespace Assets.Scripts
                 else
                 {
                     bool assigned = false;
+                    //videoPlayers = new List<VideoPlayer>();
 
                     switch (mediaInfo.mediaTypeId)
                     {
@@ -296,6 +304,13 @@ namespace Assets.Scripts
 
                 //Debug.Log($"Assign portal to display {mediaInfo.screenDisplayId}?: {mediaInfo.isPortal}");
                 //AssignPortalToScreen(mediaInfo.screenDisplayId, mediaInfo.isPortal);
+            }
+            
+            Debug.Log("Preparing VideoPlayers");
+
+            foreach (VideoPlayer videoPlayer in videoPlayers)
+            {
+                StartCoroutine(PrepareVideo(videoPlayer));
             }
         }
 
@@ -520,6 +535,8 @@ namespace Assets.Scripts
         {
             StoreRealtimeScreenMediaState();
             StoreBufferScreenMediaState();
+
+            //AssignMediaToDisplaysFromArray();
 
             Clear();
         }
@@ -775,6 +792,8 @@ namespace Assets.Scripts
                 {
                     savePath = $"{Application.persistentDataPath}/{mediaDetail.Filename}";
                 }
+
+                Debug.Log($"Save path: {savePath}");
 
                 mediaDetail.LocalPath = savePath;
 
@@ -1121,10 +1140,16 @@ namespace Assets.Scripts
 
         public void StoreBufferScreenMediaState()
         {
+            Debug.Log("In StoreBufferScreenMediaState");
+
             foreach (var prepBuffer in _mediaStatePreparationBuffer)
             {
                 var existing =
-                    _mediaStateBuffer.FirstOrDefault(s => s.ScreenDisplayId == prepBuffer.ScreenDisplayId);
+                    _mediaStateBuffer.FirstOrDefault(s =>
+                        s.ScreenDisplayId == prepBuffer.ScreenDisplayId &&
+                        s.MediaTypeId == prepBuffer.MediaTypeId &&
+                        s.MediaId == prepBuffer.MediaId
+                    );
 
                 Debug.Log($"StoreBufferScreenMediaState. Exists: {existing != null}");
 
@@ -1149,6 +1174,8 @@ namespace Assets.Scripts
 
         public void StoreRealtimeScreenMediaState()
         {
+            Debug.Log("In StoreRealtimeScreenMediaState");
+
             foreach (var buffer in _mediaStatePreparationBuffer)
             {
                 var existing =
@@ -1377,6 +1404,7 @@ namespace Assets.Scripts
             return screenObject;
         }
 
+
         private bool AssignVideoToDisplay(int videoId, int screenId)
         {
             try
@@ -1398,13 +1426,13 @@ namespace Assets.Scripts
 
                     Debug.Log($"Show video '{thisVideoClip.Title}' on display {screenObject.name}");
 
-                    var videoDisplay = screenObject.transform.Find(videoDisplayName);
-                    var canvasDisplay = screenObject.transform.Find(canvasDisplayName);
+                    Transform videoDisplay = screenObject.transform.Find(videoDisplayName);
+                    Transform canvasDisplay = screenObject.transform.Find(canvasDisplayName);
 
                     videoDisplay.gameObject.SetActive(true);
                     canvasDisplay.gameObject.SetActive(false);
 
-                    var videoPlayer = videoDisplay.GetComponentInChildren<VideoPlayer>();
+                    VideoPlayer videoPlayer = videoDisplay.GetComponentInChildren<VideoPlayer>();
 
                     //Add AudioSource
                     AudioSource audioSource = gameObject.AddComponent<AudioSource>();
@@ -1439,10 +1467,11 @@ namespace Assets.Scripts
                             // ...and we set the audio source for this track
                             videoPlayer.SetTargetAudioSource(0, audioSource);
 
-
                             videoPlayer.url = thisVideoClip.LocalPath;
+                            
+                            videoPlayers.Add(videoPlayer);
 
-                            StartCoroutine(PrepareVideo(videoPlayer));
+                            //StartCoroutine(PrepareVideo(videoPlayer));
                         }
                     }
                     else
@@ -1465,15 +1494,14 @@ namespace Assets.Scripts
                 return false;
             }
         }
-
-        // TODO: change this so that PrepareVideo (or even just the videoPlayer.Play() line) runs once all screens have been prepared.
-        // Will need to store them in a temporary array or something like that..
+        
         IEnumerator PrepareVideo(VideoPlayer videoPlayer)
         {
             videoPlayer.Prepare();
 
             while (!videoPlayer.isPrepared)
             {
+                Debug.Log($"Preparing {videoPlayer.name}");
                 yield return new WaitForEndOfFrame();
             }
 
