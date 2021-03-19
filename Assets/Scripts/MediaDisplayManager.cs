@@ -308,10 +308,10 @@ namespace Assets.Scripts
             
             Debug.Log("Preparing VideoPlayers");
 
-            foreach (VideoPlayer videoPlayer in videoPlayers)
-            {
-                StartCoroutine(PrepareVideo(videoPlayer));
-            }
+            //foreach (VideoPlayer videoPlayer in videoPlayers)
+            //{
+            //    StartCoroutine(PrepareVideo(videoPlayer));
+            //}
         }
 
 
@@ -764,7 +764,7 @@ namespace Assets.Scripts
 
             player.position = newPosition;
 
-            player.eulerAngles = new Vector3(-15f, 0f, -1f);
+            player.eulerAngles = new Vector3(0f, 0f, 0f);
 
 
             if (sceneId == 9) MediaDisplayManager.instance.SetSkybox(true);
@@ -1413,7 +1413,7 @@ namespace Assets.Scripts
                 //Debug.Log($"videoId: {videoId}");
                 //Debug.Log($"displayId: {displayId}");
 
-                var displaySuffix = "Wide";
+                var displaySuffix = "Tall";
 
                 var canvasDisplayName = $"CanvasDisplay{displaySuffix}";
                 var videoDisplayName = $"VideoDisplay{displaySuffix}";
@@ -1471,7 +1471,7 @@ namespace Assets.Scripts
                             
                             videoPlayers.Add(videoPlayer);
 
-                            //StartCoroutine(PrepareVideo(videoPlayer));
+                            StartCoroutine(PrepareVideo(videoPlayer));
                         }
                     }
                     else
@@ -1504,8 +1504,9 @@ namespace Assets.Scripts
                 Debug.Log($"Preparing {videoPlayer.name}");
                 yield return new WaitForEndOfFrame();
             }
-
+             
             videoPlayer.Play();
+
         }
 
         private bool AssignStreamToDisplay(int streamId, int displayId)
@@ -1735,7 +1736,7 @@ namespace Assets.Scripts
                     screen.name = screenName;
 
                     var screenNumber = screen.GetComponentInChildren<Text>();
-                    screenNumber.text = screenPosition.Id.ToString();
+                    //screenNumber.text = screenPosition.Id.ToString();
 
                     currentScene.CurrentScreens.Add(screen);
 
