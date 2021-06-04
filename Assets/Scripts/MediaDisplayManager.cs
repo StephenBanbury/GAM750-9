@@ -50,9 +50,9 @@ namespace Assets.Scripts
         private MediaType _lastSelectedMediaType;
         private float _floorAdjust = 1.25f;
         private List<ScreenPortalBufferState> _screenPortalBuffer;
-        private List<MediaScreenDisplayBufferState> _mediaStateBuffer;
-        private List<MediaScreenDisplayBufferState> _mediaStatePreparationBuffer;
-        private MediaScreenDisplayBufferState _mediaStatePreparation;
+        private List<MediaScreenAssignState> _mediaStateBuffer;
+        private List<MediaScreenAssignState> _mediaStatePreparationBuffer;
+        private MediaScreenAssignState _mediaStatePreparation;
         private int _currentSceneId;
         private int _currentVideoClip;
         private int _currentVideoStream;
@@ -293,7 +293,7 @@ namespace Assets.Scripts
 
                     if (assigned)
                     {
-                        _mediaStateBuffer.Add(new MediaScreenDisplayBufferState
+                        _mediaStateBuffer.Add(new MediaScreenAssignState
                         {
                             MediaTypeId = mediaInfo.mediaTypeId,
                             MediaId = mediaInfo.mediaId,
@@ -366,7 +366,7 @@ namespace Assets.Scripts
             _currentVideoClip = 0;
             _currentVideoStream = id;
 
-            _mediaStatePreparation = new MediaScreenDisplayBufferState
+            _mediaStatePreparation = new MediaScreenAssignState
             {
                 MediaTypeId = (int)MediaType.VideoStream,
                 MediaId = id
@@ -377,12 +377,14 @@ namespace Assets.Scripts
             EnablePortalButton(false);
         }
 
-        int _hundreds;
-        int _tens;
-        int _ones;
+        private int _hundreds;
+        private int _tens;
+        private int _ones;
 
         public void VideoSelect(int id, string buttonName)
         {
+            Debug.Log($"VideoSelect id:{id}, buttonName:{buttonName}");
+            
             _lastSelectionSelected = 4;
 
             int temp = _currentVideoClip;
@@ -415,7 +417,7 @@ namespace Assets.Scripts
 
             _videoClipValue.text = _currentVideoClip.ToString();
 
-            _mediaStatePreparation = new MediaScreenDisplayBufferState
+            _mediaStatePreparation = new MediaScreenAssignState
             {
                 MediaTypeId = (int) MediaType.VideoClip,
                 MediaId = id
@@ -423,11 +425,16 @@ namespace Assets.Scripts
 
             _currentVideoStream = 0;
 
+
+            Debug.Log($"VideoSelect _mediaStatePreparation:{_mediaStatePreparation.MediaId}");
+
             EnablePortalButton(false);
         }
 
         public void ScreenSelect(int id)
         {
+            Debug.Log($"ScreenSelect id:{id}");
+
             int compositeId = CompoundScreenId(id);
 
             // Last selected = scene
@@ -464,7 +471,7 @@ namespace Assets.Scripts
                         }
                         else
                         {
-                            _mediaStatePreparationBuffer.Add(new MediaScreenDisplayBufferState
+                            _mediaStatePreparationBuffer.Add(new MediaScreenAssignState
                             {
                                 MediaTypeId =
                                     (int) (_currentVideoClip > 0 ? MediaType.VideoClip : MediaType.VideoStream),
@@ -498,6 +505,11 @@ namespace Assets.Scripts
                 EnablePortalButton(false);
                 _lastSelectionSelected = 6;
             }
+
+        }
+
+        public void PresetDisplay()
+        {
 
         }
 
@@ -597,8 +609,8 @@ namespace Assets.Scripts
         {
             Videos = new List<MediaDetail>();
             //ScreensAsPortal = new List<int>();
-            _mediaStatePreparationBuffer = new List<MediaScreenDisplayBufferState>();
-            _mediaStateBuffer = new List<MediaScreenDisplayBufferState>();
+            _mediaStatePreparationBuffer = new List<MediaScreenAssignState>();
+            _mediaStateBuffer = new List<MediaScreenAssignState>();
             _screenPortalBuffer = new List<ScreenPortalBufferState>();
 
             GetLocalVideosDetails();
@@ -638,10 +650,23 @@ namespace Assets.Scripts
             SpawnVideoStreamSelectButtons();
             SpawnScreenSelectButtons();
 
+            // Test: set preset screen displays
+            SetPresetScreenDisplays();
+
             EnablePortalButton(false);
             MyCurrentScene = Scene.Scene1;
             _sceneValue.text = "1";
             _lastSelectionSelected = 1;
+        }
+
+        private void SetPresetScreenDisplays()
+        {
+            Debug.Log("set preset screen displays");
+
+            var presetService = new PresetService();
+
+            presetService.Test();
+
         }
 
         //public void SetNextScreenAction(int screenId)
@@ -737,9 +762,9 @@ namespace Assets.Scripts
             MyCurrentScene = (Scene)sceneId;
         }
 
-        public void Targeted360CameraPosition(int screenId)
+        public void Targeted360CameraPosition(int sceneId)
         {
-            StartCoroutine(GoTo360CameraPosition(screenId));
+            StartCoroutine(GoTo360CameraPosition(sceneId));
         }
 
         private IEnumerator GoTo360CameraPosition(int sceneId)
@@ -1160,7 +1185,7 @@ namespace Assets.Scripts
                 }
                 else
                 {
-                    MediaScreenDisplayBufferState mediaScreenDisplayBufferState = new MediaScreenDisplayBufferState
+                    MediaScreenAssignState mediaScreenDisplayBufferState = new MediaScreenAssignState
                     {
                         ScreenDisplayId = prepBuffer.ScreenDisplayId,
                         MediaTypeId = prepBuffer.MediaTypeId,

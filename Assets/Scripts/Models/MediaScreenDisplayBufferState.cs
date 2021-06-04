@@ -1,6 +1,6 @@
 ﻿namespace Assets.Scripts.Models
 {
-    public class MediaScreenDisplayBufferState
+    public class MediaScreenAssignState
     {
         public int MediaTypeId;
         public int MediaId;
