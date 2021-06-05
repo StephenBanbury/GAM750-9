@@ -39,7 +39,9 @@ namespace Assets.Scripts
         [SerializeField] private Text _videoClipValue;
         [SerializeField] private Text _screenValue;
         [SerializeField] private Material _skybox1;
-        [SerializeField] private Material _skybox2;
+        private Material _skybox2;
+        
+        private List<Camera> _allCameras;
 
         private int _sceneIndex;
         //private int _lastSelectedVideoId;
@@ -57,6 +59,7 @@ namespace Assets.Scripts
         private int _compositeScreenId = 0;
         private float _buttonOffset = 31f;
         private bool _interfaceIsOn = true;
+        private Camera _currentCamera;
 
         private List<VideoPlayer> videoPlayers = new List<VideoPlayer>();
 
@@ -93,6 +96,7 @@ namespace Assets.Scripts
         void Start()
         {
             _currentSceneId = 1;
+            
             SetSkybox(false);
             StartCoroutine(AwaitVideosFromApiBeforeStart());
         }
@@ -256,7 +260,7 @@ namespace Assets.Scripts
 
         public void AssignMediaToDisplaysFromArray()
         {
-            Debug.Log("In AssignMediaToDisplaysFromArray");
+            //Debug.Log("In AssignMediaToDisplaysFromArray");
 
             foreach (var mediaInfo in model.mediaScreenDisplayStates)
             {
@@ -304,14 +308,13 @@ namespace Assets.Scripts
                 //AssignPortalToScreen(mediaInfo.screenDisplayId, mediaInfo.isPortal);
             }
             
-            Debug.Log("Preparing VideoPlayers");
+            //Debug.Log("Preparing VideoPlayers");
 
             //foreach (VideoPlayer videoPlayer in videoPlayers)
             //{
             //    StartCoroutine(PrepareVideo(videoPlayer));
             //}
         }
-
 
 
         #region Controller UI
@@ -655,6 +658,9 @@ namespace Assets.Scripts
             MyCurrentScene = Scene.Scene1;
             _sceneValue.text = "1";
             _lastSelectionSelected = 1;
+
+            InitialiseAllCameras();
+            SetCamera("Camera 0");
         }
 
         private void SetPresetScreenDisplays()
@@ -1775,11 +1781,10 @@ namespace Assets.Scripts
                     screenNumber.enabled = showNumbers;
                 }
 
-
                 var screenCamera = screen.GetComponentInChildren<Camera>();
                 if (screenCamera != null)
                 {
-                    CameraSetup(screenCamera, $"Camera {screenId}", false);
+                    screenCamera.name = $"Camera {screenId}";
                 }
 
                 currentScene.CurrentScreens.Add(screen);
@@ -1796,17 +1801,23 @@ namespace Assets.Scripts
             _sceneIndex++;
         }
 
-        private void CameraSetup(Camera camera, string name, bool isEnabled)
+        private void InitialiseAllCameras()
         {
-            camera.name = name;
-            camera.enabled = isEnabled;
-            camera.GetComponent<AudioListener>().enabled = isEnabled;
-            Debug.Log($"{camera.name} is enabled: {camera.isActiveAndEnabled}");
+            _allCameras = new List<Camera>();
+            foreach (var camera in Camera.allCameras)
+            {
+                _allCameras.Add(camera);
+                //Debug.Log($"{camera} added to _allCameras");
+            }
         }
 
-        private void CameraSwitch(string cameraName)
+        private void SetCamera(string cameraName)
         {
-
+            foreach (var camera in _allCameras)
+            {
+                camera.enabled = camera.name == cameraName;
+                camera.GetComponent<AudioListener>().enabled = camera.name == cameraName;
+            }
         }
 
         public void TweenScreens(ScreenFormation newFormation, int tweenTimeSeconds)
