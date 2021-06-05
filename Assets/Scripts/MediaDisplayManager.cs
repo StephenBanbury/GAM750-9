@@ -1658,27 +1658,28 @@ namespace Assets.Scripts
 
             // Instantiate selection panels, audio source and lighting as part of scene object
 
-            var selectionPanelsTrans = sceneObject.transform.Find($"Selection Panel {_sceneIndex}");
-            if (selectionPanelsTrans == null)
-            {
-                //GameObject selectionPanels = Instantiate(_selectionPanels, _selectionPanels.transform.position + scenePosition, Quaternion.identity);
-                //selectionPanels.transform.SetParent(sceneObject.transform);
-                //selectionPanels.name = $"Selection Panel {_sceneIndex}";
+            //var selectionPanelsTrans = sceneObject.transform.Find($"Selection Panel {_sceneIndex}");
 
-                //Text indicator = selectionPanels.transform.Find("SceneSelectorView/Canvas/SceneText").GetComponent<Text>();
-                //if (indicator != null)
-                //{
-                //    indicator.text = sceneName;
-                //}
+            //if (selectionPanelsTrans == null)
+            //{
+            //    //GameObject selectionPanels = Instantiate(_selectionPanels, _selectionPanels.transform.position + scenePosition, Quaternion.identity);
+            //    //selectionPanels.transform.SetParent(sceneObject.transform);
+            //    //selectionPanels.name = $"Selection Panel {_sceneIndex}";
 
-                //foreach (Transform child in selectionPanels.transform)
-                //{
-                //    Debug.Log($"In selection panel: {child.name}");
-                //}
+            //    //Text indicator = selectionPanels.transform.Find("SceneSelectorView/Canvas/SceneText").GetComponent<Text>();
+            //    //if (indicator != null)
+            //    //{
+            //    //    indicator.text = sceneName;
+            //    //}
 
-                //var indicator = texts.FirstOrDefault(t => t.name == "SceneIndicator");
-                //if (indicator != null) indicator.text = sceneName;
-            }
+            //    //foreach (Transform child in selectionPanels.transform)
+            //    //{
+            //    //    Debug.Log($"In selection panel: {child.name}");
+            //    //}
+
+            //    //var indicator = texts.FirstOrDefault(t => t.name == "SceneIndicator");
+            //    //if (indicator != null) indicator.text = sceneName;
+            //}
 
             var sceneAudioTrans = sceneObject.transform.Find($"Scene Audio {_sceneIndex}");
             if (sceneAudioTrans == null)
@@ -1801,6 +1802,11 @@ namespace Assets.Scripts
             camera.enabled = isEnabled;
             camera.GetComponent<AudioListener>().enabled = isEnabled;
             Debug.Log($"{camera.name} is enabled: {camera.isActiveAndEnabled}");
+        }
+
+        private void CameraSwitch(string cameraName)
+        {
+
         }
 
         public void TweenScreens(ScreenFormation newFormation, int tweenTimeSeconds)
