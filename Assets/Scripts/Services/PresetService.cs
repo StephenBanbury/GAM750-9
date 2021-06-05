@@ -39,7 +39,7 @@ namespace Assets.Scripts.Services
 
             _screenDisplayPresets.Add(preset);
 
-            Debug.Log($"test: {_screenDisplayPresets[0].MediaScreenAssignStates.Count}");
+            Debug.Log($"preset test: {_screenDisplayPresets[0].MediaScreenAssignStates.Count}");
 
             return _screenDisplayPresets;
         }

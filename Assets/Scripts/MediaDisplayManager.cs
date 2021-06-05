@@ -5,13 +5,11 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using Assets.Scripts.Enums;
 using Assets.Scripts.Services;
 using DG.Tweening;
 using Normal.Realtime;
 using Normal.Realtime.Serialization;
-using UnityEngine.Events;
 using UnityEngine.Networking;
 using UnityEngine.UI;
 using UnityEngine.Video;
@@ -44,10 +42,10 @@ namespace Assets.Scripts
         [SerializeField] private Material _skybox2;
 
         private int _sceneIndex;
-        private int _lastSelectedVideoId;
-        private int _lastSelectedStreamId;
-        private int _lastSelectedDisplayId;
-        private MediaType _lastSelectedMediaType;
+        //private int _lastSelectedVideoId;
+        //private int _lastSelectedStreamId;
+        //private int _lastSelectedDisplayId;
+        //private MediaType _lastSelectedMediaType;
         private float _floorAdjust = 1.25f;
         private List<ScreenPortalBufferState> _screenPortalBuffer;
         private List<MediaScreenAssignState> _mediaStateBuffer;
@@ -1719,54 +1717,74 @@ namespace Assets.Scripts
 
             var currentScene = Scenes.First(s => s.Id == _sceneIndex);
 
+
+            // TODO: these could be elsewhere
+            const bool showHiddenScreens = false;
+            const bool showNumbers = false;
+
             foreach (var screenPosition in thisFormation)
             {
                 var screenId = _sceneIndex * 100 + screenPosition.Id;
 
-                if (!screenPosition.Hide)
+                //if (showHiddenScreens || (!showHiddenScreens && screenPosition.Hide))
+                //{
+                var vector3 = screenPosition.Vector3;
+                vector3.y += _floorAdjust;
+
+                GameObject screen;
+
+                GameObject thisScreen;
+                string screenName;
+
+                if (screenPosition.Id % 2 != 0)
                 {
-                    var vector3 = screenPosition.Vector3;
-                    vector3.y += _floorAdjust;
-
-                    GameObject screen;
-
-                    GameObject thisScreen;
-                    string screenName;
-
-                    if (screenPosition.Id % 2 != 0)
-                    {
-                        screenName = $"Screen {screenId}";
-                        thisScreen = _screen;
-                    }
-                    else
-                    {
-                        screenName = $"Screen Variant {screenId}";
-                        thisScreen = _screenVariant;
-                    }
-
-                    screen = GameObject.Find(screenName);
-
-                    if (screen == null)
-                    {
-                        screen = Instantiate(thisScreen, vector3, Quaternion.identity);
-                        //screen = Realtime.Instantiate(screenName, vector3, Quaternion.identity);
-                        screen.transform.Rotate(0, screenPosition.Rotation, 0);
-                        screen.transform.SetParent(screensContainer.transform);
-                    }
-                    //else
-                    //{
-                    //    Debug.Log($"{screenName} exists");
-                    //}
-
-                    screen.name = screenName;
-
-                    var screenNumber = screen.GetComponentInChildren<Text>();
-                    //screenNumber.text = screenPosition.Id.ToString();
-
-                    currentScene.CurrentScreens.Add(screen);
-
-                    //SetNextScreenAction(screenId);
+                    screenName = $"Screen {screenId}";
+                    thisScreen = _screen;
                 }
+                else
+                {
+                    screenName = $"Screen Variant {screenId}";
+                    thisScreen = _screenVariant;
+                }
+
+                screen = GameObject.Find(screenName);
+
+                if (screen == null)
+                {
+                    screen = Instantiate(thisScreen, vector3, Quaternion.identity);
+                    //screen = Realtime.Instantiate(screenName, vector3, Quaternion.identity);
+                    screen.transform.Rotate(0, screenPosition.Rotation, 0);
+                    screen.transform.SetParent(screensContainer.transform);
+                    if (!showHiddenScreens && screenPosition.Hide)
+                    {
+                        screen.SetActive(false);
+                    }
+                }
+                //else
+                //{
+                //    Debug.Log($"{screenName} exists");
+                //}
+
+                screen.name = screenName;
+
+                var screenNumber = screen.GetComponentInChildren<Text>();
+                if (screenNumber != null)
+                {
+                    screenNumber.text = screenPosition.Id.ToString();
+                    screenNumber.enabled = showNumbers;
+                }
+
+
+                var screenCamera = screen.GetComponentInChildren<Camera>();
+                if (screenCamera != null)
+                {
+                    CameraSetup(screenCamera, $"Camera {screenId}", false);
+                }
+
+                currentScene.CurrentScreens.Add(screen);
+
+                //SetNextScreenAction(screenId);
+                //}
 
                 ScreenActions.Add(new ScreenActionModel
                 {
@@ -1775,6 +1793,14 @@ namespace Assets.Scripts
             }
 
             _sceneIndex++;
+        }
+
+        private void CameraSetup(Camera camera, string name, bool isEnabled)
+        {
+            camera.name = name;
+            camera.enabled = isEnabled;
+            camera.GetComponent<AudioListener>().enabled = isEnabled;
+            Debug.Log($"{camera.name} is enabled: {camera.isActiveAndEnabled}");
         }
 
         public void TweenScreens(ScreenFormation newFormation, int tweenTimeSeconds)
