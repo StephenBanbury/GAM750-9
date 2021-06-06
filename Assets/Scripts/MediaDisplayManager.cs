@@ -518,24 +518,40 @@ namespace Assets.Scripts
             var mediaScreenAssignStates = new List<MediaScreenAssignState>();
 
             // test preset
-            for (int i = 101; i <= 116; i++)
+            for (int i = 1; i <= 16; i++)
             {
                 mediaScreenAssignStates.Add(
                     new MediaScreenAssignState
                     {
                         MediaId = i,
                         MediaTypeId = (int) MediaType.VideoClip,
-                        ScreenDisplayId = i
+                        ScreenDisplayId = i + 100
                     }
                 );
             }
 
             int presetId = _presetService.SetPresets(mediaScreenAssignStates);
 
+
+            mediaScreenAssignStates = new List<MediaScreenAssignState>();
+
+            // test preset
+            for (int i = 17; i <= 32; i++)
+            {
+                mediaScreenAssignStates.Add(
+                    new MediaScreenAssignState
+                    {
+                        MediaId = i - 16 + 100,
+                        MediaTypeId = (int) MediaType.VideoClip,
+                        ScreenDisplayId = i - 16 + 200
+                    }
+                );
+            }
+
+            presetId = _presetService.SetPresets(mediaScreenAssignStates);
+
             Debug.Log($"presetId: {presetId}");
 
-            // Test
-            PresetSelect(1);
         }
 
         public void PresetSelect(int id)
