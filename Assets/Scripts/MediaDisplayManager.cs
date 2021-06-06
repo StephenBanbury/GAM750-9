@@ -525,7 +525,7 @@ namespace Assets.Scripts
                     {
                         MediaId = i,
                         MediaTypeId = (int) MediaType.VideoClip,
-                        ScreenDisplayId = i + 100
+                        ScreenDisplayId = i
                     }
                 );
             }
@@ -543,7 +543,7 @@ namespace Assets.Scripts
                     {
                         MediaId = i - 16 + 100,
                         MediaTypeId = (int) MediaType.VideoClip,
-                        ScreenDisplayId = i - 16 + 200
+                        ScreenDisplayId = i - 16
                     }
                 );
             }
@@ -561,18 +561,19 @@ namespace Assets.Scripts
 
             _mediaStatePreparationBuffer = new List<MediaScreenAssignState>();
 
-            //_mediaStatePreparationBuffer.AddRange(preset.MediaScreenAssignStates);
-
             foreach (var state in preset.MediaScreenAssignStates)
             {
+                var screenId = CompoundScreenId(state.ScreenDisplayId);
+
                 Debug.Log(
-                    $"Preset State - MediaType: {state.MediaTypeId}, MediaId: {state.MediaId}, Display: {state.ScreenDisplayId}");
+                    $"Preset State - MediaType: {state.MediaTypeId}, MediaId: {state.MediaId}, Display: {screenId}");
+                
                 _mediaStatePreparationBuffer.Add(
                     new MediaScreenAssignState
                     {
                         MediaId = state.MediaId,
                         MediaTypeId = state.MediaTypeId,
-                        ScreenDisplayId = state.ScreenDisplayId
+                        ScreenDisplayId = screenId
                     });
             }
 
