@@ -80,6 +80,8 @@ namespace Assets.Scripts
 
         private ScreenPortalStateModel _screenPortalStateModel;
 
+        private PresetService _presetService;
+
         void Awake()
         {
             if (instance == null)
@@ -509,9 +511,56 @@ namespace Assets.Scripts
 
         }
 
-        public void PresetDisplay()
+        public void PresetSet()
         {
+            // Test
 
+            var mediaScreenAssignStates = new List<MediaScreenAssignState>();
+
+            // test preset
+            for (int i = 101; i <= 116; i++)
+            {
+                mediaScreenAssignStates.Add(
+                    new MediaScreenAssignState
+                    {
+                        MediaId = i,
+                        MediaTypeId = (int) MediaType.VideoClip,
+                        ScreenDisplayId = i
+                    }
+                );
+            }
+
+            int presetId = _presetService.SetPresets(mediaScreenAssignStates);
+
+            Debug.Log($"presetId: {presetId}");
+
+            // Test
+            PresetSelect(1);
+        }
+
+        public void PresetSelect(int id)
+        {
+            Debug.Log($"Preset {id}");
+            var preset = _presetService.GetPreset(id);
+
+            _mediaStatePreparationBuffer = new List<MediaScreenAssignState>();
+
+            //_mediaStatePreparationBuffer.AddRange(preset.MediaScreenAssignStates);
+
+            foreach (var state in preset.MediaScreenAssignStates)
+            {
+                Debug.Log(
+                    $"Preset State - MediaType: {state.MediaTypeId}, MediaId: {state.MediaId}, Display: {state.ScreenDisplayId}");
+                _mediaStatePreparationBuffer.Add(
+                    new MediaScreenAssignState
+                    {
+                        MediaId = state.MediaId,
+                        MediaTypeId = state.MediaTypeId,
+                        ScreenDisplayId = state.ScreenDisplayId
+                    });
+            }
+
+            Apply();
         }
 
         private void EnablePortalButton(bool enable)
@@ -652,7 +701,8 @@ namespace Assets.Scripts
             SpawnScreenSelectButtons();
 
             // Test: set preset screen displays
-            SetPresetScreenDisplays();
+            _presetService = new PresetService();
+            PresetSet();
 
             EnablePortalButton(false);
             MyCurrentScene = Scene.Scene1;
@@ -660,17 +710,7 @@ namespace Assets.Scripts
             _lastSelectionSelected = 1;
 
             InitialiseAllCameras();
-            SetCamera("Camera 0");
-        }
-
-        private void SetPresetScreenDisplays()
-        {
-            Debug.Log("set preset screen displays");
-
-            var presetService = new PresetService();
-
-            presetService.Test();
-
+            CameraSelect("Camera 0");
         }
 
         //public void SetNextScreenAction(int screenId)
@@ -775,15 +815,15 @@ namespace Assets.Scripts
         {
             string spawnPointName = $"360 Spawn Point {sceneId}";
             Transform spawnPoint = GameObject.Find(spawnPointName).transform;
-
-            Transform player = GameObject.Find("Main Camera").transform;
+            
+            var player = Camera.main;
 
             Debug.Log($"Teleporting to {spawnPointName}");
             Debug.Log($"SpawnPoint position: {spawnPoint.position}");
 
             //PlayerAudioManager.instance.PlayAudioClip("Teleport 3_1");
 
-            yield return new WaitForSeconds(2f);
+            yield return new WaitForSeconds(1f);
 
             //PlayerAudioManager.instance.PlayAudioClip("Teleport 3_2");
 
@@ -791,9 +831,9 @@ namespace Assets.Scripts
 
             Vector3 newPosition = spawnPoint.position;
 
-            player.position = newPosition;
+            player.transform.position = newPosition;
 
-            player.eulerAngles = new Vector3(0f, 0f, 0f);
+            player.transform.eulerAngles = new Vector3(0f, 0f, 0f);
 
 
             if (sceneId == 9) MediaDisplayManager.instance.SetSkybox(true);
@@ -1811,7 +1851,7 @@ namespace Assets.Scripts
             }
         }
 
-        private void SetCamera(string cameraName)
+        public void CameraSelect(string cameraName)
         {
             foreach (var camera in _allCameras)
             {
