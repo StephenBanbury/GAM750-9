@@ -141,7 +141,7 @@ namespace Assets.Scripts
 
         private VideoSurface MakeImageSurface(AgoraUser user)
         {
-            var displaySuffix = "Tall";
+            var displaySuffix = "Wide";
 
             var canvasDisplayName = $"CanvasDisplay{displaySuffix}";
             var videoDisplayName = $"VideoDisplay{displaySuffix}";

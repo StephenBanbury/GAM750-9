@@ -1499,7 +1499,7 @@ namespace Assets.Scripts
                 //Debug.Log($"videoId: {videoId}");
                 //Debug.Log($"displayId: {displayId}");
 
-                var displaySuffix = "Tall";
+                var displaySuffix = "Wide";
 
                 var canvasDisplayName = $"CanvasDisplay{displaySuffix}";
                 var videoDisplayName = $"VideoDisplay{displaySuffix}";
